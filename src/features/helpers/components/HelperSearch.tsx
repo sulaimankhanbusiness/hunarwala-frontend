@@ -11,6 +11,7 @@ import Link from 'next/link';
 import CitySelect from '@/features/location/components/CitySelect';
 import SkillSelect from '@/features/skills/components/SkillSelect';
 import dynamic from 'next/dynamic';
+import LocationPermissionsModal from '@/features/location/components/LocationPermissionsModal';
 
 const HelperMap = dynamic(() => import('./HelperMap'), {
   ssr: false,
@@ -28,6 +29,8 @@ export default function HelperSearch() {
 
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
   const [isCityDetecting, setIsCityDetecting] = useState(false);
+  const [locationError, setLocationError] = useState<{ code: number; message: string } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   // Search parameters state
@@ -46,23 +49,21 @@ export default function HelperSearch() {
       setIsCityDetecting(true);
       try {
         const position = await getCurrentCoordinates();
-        // console.log({position});
-        // const position = {
-        //   coords:{
-        //      latitude:34.1958,
-        //      longitude:72.0447
-        //   }
-        // }
         const { latitude, longitude } = position.coords;
-        console.log({latitude, longitude});
+        console.log({ latitude, longitude });
         console.log(latitude, longitude);
         const data = await reverseGeocode(latitude, longitude);
         console.log(data);
         if (data && data.city) {
           setDetectedCity(data.city);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Initial city detection failed:', err);
+        setLocationError({ code: err.code || 0, message: err.message });
+
+        // Show modal on first load if permission is denied or position unavailable
+        // This ensures the user is prompted to fix it immediately
+        setIsModalOpen(true);
       } finally {
         setIsCityDetecting(false);
       }
@@ -73,19 +74,21 @@ export default function HelperSearch() {
 
 
   // Trigger search when updated
-  const handleSearch = () => {
+  const handleSearch = (manualLoc?: typeof location) => {
     const params: any = {};
     if (skill) params.skill = skill;
 
-    if (userLocation) {
+    const currentLoc = manualLoc || location;
+
+    if (userLocation && !manualLoc) {
       params.latitude = userLocation.lat;
       params.longitude = userLocation.lng;
       params.radiusKm = radius;
     } else {
-      if (location.country) params.country = location.country;
-      if (location.region) params.region = location.region;
-      if (location.city) params.city = location.city;
-      setDetectedCity(location.city || null);
+      if (currentLoc.country) params.country = currentLoc.country;
+      if (currentLoc.region) params.region = currentLoc.region;
+      if (currentLoc.city) params.city = currentLoc.city;
+      setDetectedCity(currentLoc.city || null);
     }
 
     setSearchParams(params);
@@ -99,6 +102,7 @@ export default function HelperSearch() {
 
   const detectLocation = async () => {
     setIsDetecting(true);
+    setLocationError(null);
     try {
       const position = await getCurrentCoordinates();
       const { latitude, longitude } = position.coords;
@@ -106,25 +110,17 @@ export default function HelperSearch() {
       setUserLocation({ lat: latitude, lng: longitude });
       setIsNearByActive(true);
 
-      // Auto search when location is detected
       const params: any = { latitude, longitude, radius };
       if (skill) params.skill = skill;
       setSearchParams(params);
 
-      // Clear manual location states
       setLocation({ country: '', region: '', city: '' });
       setShowMap(true);
+      setIsModalOpen(false);
     } catch (error: any) {
       console.error('Error detecting location:', error);
-      let message = 'Could not detect location. Please select a city manually.';
-
-      // PERMISSION_DENIED
-      if (error.code === 1) {
-        message = 'Location access denied. Please enable location permissions.';
-      } else {
-        message = 'Location detection failed. Please select a city manually.';
-      }
-      alert(message);
+      setLocationError({ code: error.code || 0, message: error.message });
+      setIsModalOpen(true);
     } finally {
       setIsDetecting(false);
     }
@@ -235,7 +231,7 @@ export default function HelperSearch() {
           {/* Search Button Column */}
           <div className="md:col-span-12 lg:col-span-3 p-2">
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               className="w-full h-[56px] bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl transition-all shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] hover:shadow-[0_15px_30px_-5px_rgba(37,99,235,0.5)] active:scale-[0.98] flex items-center justify-center gap-3 group/btn"
             >
               <div className="bg-white/20 p-2 rounded-xl group-hover/btn:rotate-12 transition-transform">
@@ -370,6 +366,20 @@ export default function HelperSearch() {
           </>
         )}
       </div>
+      <LocationPermissionsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onDetect={detectLocation}
+        onManualSelect={(loc) => {
+          setLocation(loc);
+          setUserLocation(null);
+          setIsNearByActive(false);
+          handleSearch(loc);
+          setIsModalOpen(false);
+        }}
+        isDetecting={isDetecting}
+        error={locationError}
+      />
     </div>
   );
 }

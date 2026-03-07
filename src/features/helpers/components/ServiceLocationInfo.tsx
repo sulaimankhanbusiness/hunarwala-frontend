@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { reverseGeocode } from '@/features/location/services/location.service';
+import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/error';
 import LocationPicker from '@/features/location/components/LocationPicker';
 import { Loader2, Globe, Map as MapIcon, ChevronRight } from 'lucide-react';
 import { useLocationStore } from '@/features/location/stores/useLocationStore';
@@ -76,7 +78,7 @@ export default function ServiceLocationInfo({ onSubmit, onBack, isLoading: isSub
 
     const handleFinish = () => {
         if (!selectedCityId || !coords) {
-            alert("Please select your city and pin your location on the map.");
+            toast.error("Please select your city and pin your location on the map.");
             return;
         }
         onSubmit({
@@ -136,7 +138,7 @@ export default function ServiceLocationInfo({ onSubmit, onBack, isLoading: isSub
                         {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
-                
+
             </div>
 
             <div className="space-y-2">

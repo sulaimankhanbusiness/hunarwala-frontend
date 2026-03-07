@@ -23,18 +23,32 @@ export const getIpLocation = async () => {
 };
 
 export const getCurrentCoordinates = (): Promise<GeolocationPosition> => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by this browser.'));
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0,
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation is not supported by this browser.'));
+            return;
+        }
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+        };
+        const attempt = (highAccuracy: boolean) => {
+            navigator.geolocation.getCurrentPosition(
+                resolve,
+                (error) => {
+                    if (highAccuracy && (error.code === 2 || error.code === 3)) {
+                        console.warn(`Geolocation failed (code ${error.code}: ${error.message}), retrying with lower accuracy...`);
+                        attempt(false);
+                    } else {
+                        reject(error);
+                    }
+                },
+                { ...options, enableHighAccuracy: highAccuracy }
+            );
+        };
+        attempt(true);
     });
-  });
 };
 
 export const reverseGeocode = async (lat?: number, lng?: number) => {

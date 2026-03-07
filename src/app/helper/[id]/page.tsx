@@ -1,9 +1,10 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import api from '@/lib/api';
 import { useParams } from 'next/navigation';
-import { Mail, Phone, MapPin, DollarSign, Briefcase, Star, Shield, Clock, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, MapPin, DollarSign, Briefcase, Star, Shield, Clock, ArrowLeft, CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -13,6 +14,8 @@ import type { HelperProfile } from '@/features/helpers/services/helpers.service'
 import { chatApi } from '@/features/chat/api/chat.api';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
+import { SimpleModal } from '@/components/SimpleModal';
+import { BookingForm } from '@/features/bookings/components/BookingForm';
 
 const formatWhatsAppNumber = (phoneNumber: string) => {
   const cleaned = phoneNumber.replace(/\D/g, '');
@@ -27,6 +30,7 @@ export default function HelperProfile() {
   const id = params.id as string;
 
   const router = useRouter();
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   const { data: helper, isLoading, error } = useQuery({
     queryKey: ['helper', id],
@@ -50,6 +54,14 @@ export default function HelperProfile() {
     } catch (error) {
       console.error('Failed to create chat:', error);
     }
+  };
+
+  const handleBookNow = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    setIsBookingModalOpen(true);
   };
 
   if (isLoading) {
@@ -124,124 +136,129 @@ export default function HelperProfile() {
                 )}
               </div>
 
-              <div className="mb-2 flex gap-3">
-                <a
-                  href={`tel:${helper.phoneNumber}`}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"
-                >
-                  <Phone size={20} />
-                  Call Now
-                </a>
-                <button
-                  onClick={handleChatNow}
-                  className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"
-                >
-                  <Mail size={20} />
-                  Chat Now
-                </button>
-              </div>
+              <button
+                onClick={handleBookNow}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"
+              >
+                <CalendarCheck size={20} />
+                Book Now
+              </button>
+              <a
+                href={`tel:${helper.phoneNumber}`}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"
+              >
+                <Phone size={20} />
+                Call Now
+              </a>
+              <button
+                onClick={handleChatNow}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"
+              >
+                <Mail size={20} />
+                Chat Now
+              </button>
             </div>
+          </div>
 
-            <div className="grid md:grid-cols-3 gap-8 mt-8">
-              {/* Left Column: Info */}
-              <div className="md:col-span-2 space-y-8">
-                <section>
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
-                  <p className="text-gray-600 leading-relaxed text-lg">{helper.bio}</p>
-                </section>
+          <div className="grid md:grid-cols-3 gap-8 mt-8">
+            {/* Left Column: Info */}
+            <div className="md:col-span-2 space-y-8">
+              <section>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
+                <p className="text-gray-600 leading-relaxed text-lg">{helper.bio}</p>
+              </section>
 
-                <section>
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Experience & Stats</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 rounded-xl p-4">
-                      <p className="text-sm text-gray-600 mb-1">Jobs Completed</p>
-                      <p className="text-2xl font-bold text-blue-600">{helper.jobsCompleted}</p>
-                    </div>
-                    <div className="bg-green-50 rounded-xl p-4">
-                      <p className="text-sm text-gray-600 mb-1">Status</p>
-                      <p className="text-lg font-bold text-green-600 capitalize">{helper.availabilityStatus}</p>
-                    </div>
+              <section>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Experience & Stats</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-600 mb-1">Jobs Completed</p>
+                    <p className="text-2xl font-bold text-blue-600">{helper.jobsCompleted}</p>
                   </div>
-                </section>
+                  <div className="bg-green-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-600 mb-1">Status</p>
+                    <p className="text-lg font-bold text-green-600 capitalize">{helper.availabilityStatus}</p>
+                  </div>
+                </div>
+              </section>
 
-                <section>
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">
-                    Reviews {helper.reviews.length > 0 && (
-                      <span className="text-sm font-normal text-gray-500">({helper.reviews.length})</span>
-                    )}
-                  </h2>
-                  {helper.reviews.length > 0 ? (
-                    <div className="space-y-4">
-                      {helper.reviews.map((review) => (
-                        <div key={review.id} className="bg-gray-50 rounded-xl p-6">
-                          <div className="flex items-start gap-4">
-                            <img
-                              src={review.reviewerImage}
-                              alt={review.reviewerName}
-                              className="w-12 h-12 rounded-full object-cover"
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <h3 className="font-semibold text-gray-900">{review.reviewerName}</h3>
-                                <span className="text-xs text-gray-500">
-                                  {new Date(review.createdAt).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1 mb-2">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    size={16}
-                                    className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                                  />
-                                ))}
-                                <span className="ml-2 text-sm font-medium text-gray-700">{review.rating}/5</span>
-                              </div>
-                              <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+              <section>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Reviews {helper.reviews.length > 0 && (
+                    <span className="text-sm font-normal text-gray-500">({helper.reviews.length})</span>
+                  )}
+                </h2>
+                {helper.reviews.length > 0 ? (
+                  <div className="space-y-4">
+                    {helper.reviews.map((review) => (
+                      <div key={review.id} className="bg-gray-50 rounded-xl p-6">
+                        <div className="flex items-start gap-4">
+                          <img
+                            src={review.reviewerImage}
+                            alt={review.reviewerName}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-semibold text-gray-900">{review.reviewerName}</h3>
+                              <span className="text-xs text-gray-500">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
                             </div>
+                            <div className="flex items-center gap-1 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={16}
+                                  className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                                />
+                              ))}
+                              <span className="ml-2 text-sm font-medium text-gray-700">{review.rating}/5</span>
+                            </div>
+                            <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 rounded-xl p-6 text-center text-gray-500">
-                      No reviews yet. Be the first to hire!
-                    </div>
-                  )}
-                </section>
-              </div>
-
-              {/* Right Column: Details */}
-              <div className="space-y-6">
-                <div className="bg-gray-50 rounded-xl p-6 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
-                      <DollarSign size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Hourly Rate</p>
-                      <p className="font-bold text-gray-900">Rs. {helper.ratePerHour}/hr</p>
-                    </div>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
-                      <Briefcase size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Experience</p>
-                      <p className="font-bold text-gray-900">{helper.experienceYears} Years</p>
-                    </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center text-gray-500">
+                    No reviews yet. Be the first to hire!
                   </div>
+                )}
+              </section>
+            </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
-                      <MapPin size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Location</p>
-                      <p className="font-bold text-gray-900">{helper.city}, {helper.region}</p>
-                    </div>
+            {/* Right Column: Details */}
+            <div className="space-y-6">
+              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
+                    <DollarSign size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Hourly Rate</p>
+                    <p className="font-bold text-gray-900">Rs. {helper.ratePerHour}/hr</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
+                    <Briefcase size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Experience</p>
+                    <p className="font-bold text-gray-900">{helper.experienceYears} Years</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
+                    <MapPin size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Location</p>
+                    <p className="font-bold text-gray-900">{helper.city}, {helper.region}</p>
                   </div>
                 </div>
               </div>
@@ -249,6 +266,22 @@ export default function HelperProfile() {
           </div>
         </div>
       </main>
+
+      <SimpleModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        title="Schedule Service"
+      >
+        <BookingForm
+          helperId={helper.id}
+          helperName={helper.fullName}
+          onSuccess={() => {
+            setIsBookingModalOpen(false);
+            router.push('/bookings');
+          }}
+          onCancel={() => setIsBookingModalOpen(false)}
+        />
+      </SimpleModal>
     </div>
   );
 }

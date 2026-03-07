@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, LayersControl, ScaleControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/error';
 import { LocateFixed, MapPin, Layers } from 'lucide-react';
 import { getCurrentCoordinates } from '../services/location.service';
 
@@ -76,9 +78,10 @@ export default function LocationPicker({
             onLocationDetected?.(latitude, longitude);
             setMapCenter([latitude, longitude]);
             setDetectionType('precise');
+            toast.success('Location detected! 📍');
         } catch (err: any) {
             console.error("Location detection failed", err);
-            alert(err.message || "Could not detect location. Please pin your location manually.");
+            toast.error(getErrorMessage(err, "Could not detect location. Please pin your location manually."));
         } finally {
             setIsDetecting(false);
             onDetectingChange?.(false);

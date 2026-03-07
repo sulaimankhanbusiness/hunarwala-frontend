@@ -5,7 +5,7 @@ interface User {
   id: string;
   email: string;
   fullName: string;
-  userType: 'client' | 'helper';
+  userType: 'client' | 'helper' | 'admin';
   profileImage?: string;
 }
 

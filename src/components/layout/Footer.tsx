@@ -20,7 +20,7 @@ export default function Footer() {
               <a href="#" className="text-gray-400 hover:text-blue-700 transition-colors"><Linkedin size={20} /></a>
             </div>
           </div>
-          
+
           <div>
             <h3 className="font-semibold text-gray-900 mb-4">For Customers</h3>
             <ul className="space-y-3 text-sm text-gray-600">
@@ -51,7 +51,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-400">© 2025 HunarWala. All rights reserved.</p>
           <div className="flex space-x-6 text-sm text-gray-500">

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/error';
 import { Loader2, Save, User, Briefcase, DollarSign } from 'lucide-react';
 
 const LocationPicker = dynamic(() => import('@/features/location/components/LocationPicker'), {
@@ -25,7 +27,7 @@ export default function HelperProfileForm() {
 
     const onSubmit = async (data: any) => {
         if (!location) {
-            alert('Please select your location on the map.');
+            toast.error('Please select your location on the map.');
             return;
         }
 
@@ -39,10 +41,10 @@ export default function HelperProfileForm() {
 
             console.log('Updating profile with location:', payload);
             // await updateHelperProfile(payload);
-            alert('Profile updated successfully!');
+            toast.success('Profile updated successfully! ✨');
         } catch (error) {
             console.error('Update failed:', error);
-            alert('Failed to update profile.');
+            toast.error(getErrorMessage(error, 'Failed to update profile.'));
         } finally {
             setIsLoading(false);
         }
