@@ -3,11 +3,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { walletApi } from '../api/wallet.api';
 
-export function useWallet() {
+export function useWallet( options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: ['wallet'],
         queryFn: () => walletApi.getBalance(),
         refetchInterval: 30000,
+        enabled: options?.enabled,
     });
 }
 

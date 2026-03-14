@@ -40,8 +40,20 @@ export const walletApi = {
         return api.get(`${WALLET_BASE_URL}/balance`);
     },
 
-    createTopUp: async (amount: number, screenshotUrl: string): Promise<TopUpRequest> => {
-        return api.post(`${WALLET_BASE_URL}/topup`, { amount, screenshotUrl });
+    createTopUp: async (amount: number, screenshot: File | string): Promise<TopUpRequest> => {
+        if (typeof screenshot === 'string') {
+            return api.post(`${WALLET_BASE_URL}/topup`, { amount, screenshotUrl: screenshot });
+        }
+
+        const formData = new FormData();
+        formData.append('amount', amount.toString());
+        formData.append('screenshot', screenshot);
+
+        return api.post(`${WALLET_BASE_URL}/topup`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 
     getTransactions: async (): Promise<WalletTransaction[]> => {

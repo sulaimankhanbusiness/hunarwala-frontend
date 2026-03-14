@@ -6,6 +6,8 @@ import { Check, X, Loader2, ExternalLink, Clock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
+import { getMediaUrl } from '@/utils/url';
+
 export default function TopUpApprovalList() {
     const queryClient = useQueryClient();
     const { data: requests = [], isLoading } = useQuery({
@@ -63,7 +65,8 @@ export default function TopUpApprovalList() {
                             <div className="mt-2 flex items-center gap-2">
                                 <span className="text-lg font-black text-gray-900">{request.amount.toLocaleString()} PKR</span>
                                 <a
-                                    href={request.screenshotUrl}
+                                    // href={getMediaUrl(request.screenshotUrl)}
+                                    href='https://unsplash.com/photos/a-golden-letter-c-on-a-green-background-V2Gzphkp_Fk'
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-[10px] font-bold text-gray-600 flex items-center gap-1 transition-colors"

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { walletApi } from '../api/wallet.api';
 import { X, Upload, CheckCircle2, AlertCircle, Loader2, Landmark, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { getMediaUrl } from '@/utils/url';
 
 interface TopUpModalProps {
     isOpen: boolean;
@@ -13,10 +14,24 @@ interface TopUpModalProps {
 
 export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalProps) {
     const [amount, setAmount] = useState('');
-    const [screenshotUrl, setScreenshotUrl] = useState('');
+    const [screenshot, setScreenshot] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (!file.type.match('image.*')) {
+                toast.error('Please select an image file');
+                return;
+            }
+            setScreenshot(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,14 +41,14 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
             return;
         }
 
-        if (!screenshotUrl) {
-            toast.error('Please provide a screenshot URL or link');
+        if (!screenshot) {
+            toast.error('Please upload a proof screenshot');
             return;
         }
 
         try {
             setIsSubmitting(true);
-            await walletApi.createTopUp(Number(amount), screenshotUrl);
+            await walletApi.createTopUp(Number(amount), screenshot);
             toast.success('Top-up request submitted successfully!');
             onSuccess();
             onClose();
@@ -92,21 +107,44 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2 px-1">Proof Screenshot URL</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 px-1">Proof Screenshot</label>
                             <div className="relative">
-                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                    <ImageIcon size={18} />
-                                </span>
-                                <input
-                                    type="text"
-                                    required
-                                    value={screenshotUrl}
-                                    onChange={(e) => setScreenshotUrl(e.target.value)}
-                                    className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium"
-                                    placeholder="Paste screenshot URL here..."
-                                />
+                                <label className={`
+                                    flex flex-col items-center justify-center w-full min-h-[160px] 
+                                    border-2 border-dashed rounded-[2rem] cursor-pointer 
+                                    transition-all duration-300 group
+                                    ${previewUrl ? 'border-blue-500 bg-blue-50/10' : 'border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-blue-400'}
+                                `}>
+                                    {previewUrl ? (
+                                        <div className="relative w-full h-full p-2 group">
+                                            <img
+                                                src={getMediaUrl(previewUrl)}
+                                                alt="Preview"
+                                                className="w-full h-[180px] object-cover rounded-2xl shadow-sm"
+                                            />
+                                            <div className="absolute inset-2 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
+                                                <Upload className="text-white" size={24} />
+                                                <span className="text-white text-xs font-bold ml-2">CLICK TO CHANGE</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <div className="bg-white p-4 rounded-2xl shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                                                <Upload size={24} className="text-blue-500" />
+                                            </div>
+                                            <p className="text-sm font-bold text-gray-900">Upload Transfer Proof</p>
+                                            <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">PNG, JPG up to 5MB</p>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        required={!previewUrl}
+                                    />
+                                </label>
                             </div>
-                            <p className="text-[10px] text-gray-400 mt-2 px-1 uppercase tracking-widest font-bold">Tip: Use imgur or similar for screenshots</p>
                         </div>
 
                         <div className="p-4 bg-blue-50 rounded-2xl flex items-start gap-4">

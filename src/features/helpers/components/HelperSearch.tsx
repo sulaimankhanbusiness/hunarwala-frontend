@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { getHelpers, getTopRatedProfessionals } from '../services/helpers.service';
-import { getCurrentCoordinates, reverseGeocode } from '@/features/location/services/location.service';
+import { reverseGeocode } from '@/features/location/services/location.service';
 import { Star, Shield, Award, Search, MapPin, Target, Loader2 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -12,28 +12,25 @@ import CitySelect from '@/features/location/components/CitySelect';
 import SkillSelect from '@/features/skills/components/SkillSelect';
 import dynamic from 'next/dynamic';
 import LocationPermissionsModal from '@/features/location/components/LocationPermissionsModal';
+import { getMediaUrl } from '@/utils/url';
 
 const HelperMap = dynamic(() => import('./HelperMap'), {
   ssr: false,
-  loading: () => <div className="h-[400px] w-full bg-gray-100 animate-pulse rounded-2xl" />
+  loading: () => <div className="h-[400px] w-full bg-gray-100 animate-pulse rounded-2xl" />,
 });
 
 export default function HelperSearch() {
   const [skill, setSkill] = useState('');
   const [location, setLocation] = useState({ country: '', region: '', city: '' });
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [isDetecting, setIsDetecting] = useState(false);
   const [isNearByActive, setIsNearByActive] = useState(false);
-  const [radius, setRadius] = useState(10); // default 10km
+  const [radius, setRadius] = useState(10);
   const [showMap, setShowMap] = useState(false);
 
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
   const [isCityDetecting, setIsCityDetecting] = useState(false);
-  const [locationError, setLocationError] = useState<{ code: number; message: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
-  // Search parameters state
   const [searchParams, setSearchParams] = useState<{
     skill?: string;
     country?: string;
@@ -44,38 +41,42 @@ export default function HelperSearch() {
     radiusKm?: number;
   }>({});
 
+  // On mount: attempt silent city detection for the "Top Rated in <city>" header.
+  // If it fails for any reason, open the modal so the user can fix or pick manually.
   useEffect(() => {
-    const findCity = async () => {
+    const detectInitialCity = async () => {
+      // Dynamically import to keep location logic server-safe
+      const { queryGeolocationPermission, getCurrentCoordinates } = await import(
+        '@/features/location/services/location.service'
+      );
+
+      const { state } = await queryGeolocationPermission();
+
+      // If already denied or unsupported, skip the attempt and show the modal
+      if (state === 'denied' || state === 'unsupported') {
+        setIsModalOpen(true);
+        return;
+      }
+
       setIsCityDetecting(true);
       try {
         const position = await getCurrentCoordinates();
         const { latitude, longitude } = position.coords;
-        console.log({ latitude, longitude });
-        console.log(latitude, longitude);
         const data = await reverseGeocode(latitude, longitude);
-        console.log(data);
-        if (data && data.city) {
-          setDetectedCity(data.city);
-        }
-      } catch (err: any) {
+        if (data?.city) setDetectedCity(data.city);
+      } catch (err) {
         console.error('Initial city detection failed:', err);
-        setLocationError({ code: err.code || 0, message: err.message });
-
-        // Show modal on first load if permission is denied or position unavailable
-        // This ensures the user is prompted to fix it immediately
         setIsModalOpen(true);
       } finally {
         setIsCityDetecting(false);
       }
     };
-    findCity();
+
+    detectInitialCity();
   }, []);
 
-
-
-  // Trigger search when updated
   const handleSearch = (manualLoc?: typeof location) => {
-    const params: any = {};
+    const params: Record<string, any> = {};
     if (skill) params.skill = skill;
 
     const currentLoc = manualLoc || location;
@@ -97,45 +98,42 @@ export default function HelperSearch() {
   const clearNearBy = () => {
     setIsNearByActive(false);
     setUserLocation(null);
-    setSearchParams({}); // Reset search when switching back
+    setSearchParams({});
   };
 
-  const detectLocation = async () => {
-    setIsDetecting(true);
-    setLocationError(null);
+  // Called by the "Near Me" button in the search bar (not the modal)
+  const handleNearMeClick = () => {
+    setIsModalOpen(true);
+  };
+
+  // Called by the modal on successful geolocation
+  const handleLocationSuccess = async (position: GeolocationPosition) => {
+    const { latitude, longitude } = position.coords;
+
+    setUserLocation({ lat: latitude, lng: longitude });
+    setIsNearByActive(true);
+    setLocation({ country: '', region: '', city: '' });
+    setShowMap(true);
+
+    const params: Record<string, any> = { latitude, longitude, radiusKm: radius };
+    if (skill) params.skill = skill;
+    setSearchParams(params);
+
+    // Also resolve the city name for the heading
     try {
-      const position = await getCurrentCoordinates();
-      const { latitude, longitude } = position.coords;
-
-      setUserLocation({ lat: latitude, lng: longitude });
-      setIsNearByActive(true);
-
-      const params: any = { latitude, longitude, radius };
-      if (skill) params.skill = skill;
-      setSearchParams(params);
-
-      setLocation({ country: '', region: '', city: '' });
-      setShowMap(true);
-      setIsModalOpen(false);
-    } catch (error: any) {
-      console.error('Error detecting location:', error);
-      setLocationError({ code: error.code || 0, message: error.message });
-      setIsModalOpen(true);
-    } finally {
-      setIsDetecting(false);
+      const data = await reverseGeocode(latitude, longitude);
+      if (data?.city) setDetectedCity(data.city);
+    } catch {
+      // Non-critical — heading just won't show city name
     }
   };
 
   const { data: responseData, isLoading, error } = useQuery({
     queryKey: ['helpers', searchParams],
-    queryFn: () => getHelpers({
-      ...searchParams,
-      limit: 10
-    }),
+    queryFn: () => getHelpers({ ...searchParams, limit: 10 }),
     enabled: Object.keys(searchParams).length > 0,
   });
 
-  // Top Rated Professionals Query
   const { data: topRatedData, isLoading: isTopRatedLoading } = useQuery({
     queryKey: ['top-rated-helpers', detectedCity],
     queryFn: () => getTopRatedProfessionals(detectedCity!),
@@ -143,23 +141,24 @@ export default function HelperSearch() {
   });
 
   const isManualSearch = Object.keys(searchParams).length > 0;
-  const helpers = isManualSearch ? (responseData?.items || []) : (topRatedData?.items || []);
+  const helpers = isManualSearch ? (responseData?.items ?? []) : (topRatedData?.items ?? []);
   const isAnyLoading = isLoading || isTopRatedLoading || isCityDetecting;
-
-
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 -mt-10 relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-      {/* Search Bar Container */}
+      {/* Search Bar */}
       <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-2 md:p-3 mb-12 border border-gray-100 backdrop-blur-sm bg-white/95">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-center">
-          {/* Service Column */}
+
+          {/* Service */}
           <div className="md:col-span-4 p-4 md:border-r border-gray-100 hover:bg-gray-50/50 transition-colors rounded-l-2xl group">
-            <label className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.1em] mb-1 group-hover:translate-x-1 transition-transform">What service?</label>
+            <label className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.1em] mb-1 group-hover:translate-x-1 transition-transform">
+              What service?
+            </label>
             <SkillSelect value={skill} onChange={setSkill} />
           </div>
 
-          {/* Location/Distance Column */}
+          {/* Location / Radius */}
           <div className="md:col-span-12 lg:col-span-5 p-4 md:border-r border-gray-100 hover:bg-gray-50/50 transition-colors group">
             <div className="flex justify-between items-center mb-1">
               <label className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.1em] group-hover:translate-x-1 transition-transform">
@@ -176,24 +175,14 @@ export default function HelperSearch() {
                   </button>
                 )}
                 <button
-                  onClick={detectLocation}
-                  disabled={isDetecting}
+                  onClick={handleNearMeClick}
                   className={`text-[10px] font-bold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-300 ${isNearByActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
-                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
+                      : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                     }`}
                 >
-                  {isDetecting ? (
-                    <span className="flex items-center gap-1">
-                      <Loader2 size={10} className="animate-spin" />
-                      Locating...
-                    </span>
-                  ) : (
-                    <>
-                      <Target size={10} />
-                      {isNearByActive ? 'Detected' : 'Near Me'}
-                    </>
-                  )}
+                  <Target size={10} />
+                  {isNearByActive ? 'Detected' : 'Near Me'}
                 </button>
               </div>
             </div>
@@ -201,7 +190,7 @@ export default function HelperSearch() {
             <div className="relative">
               {isNearByActive ? (
                 <div className="flex items-center gap-4 h-[44px] animate-in fade-in zoom-in duration-300">
-                  <div className="flex-1 relative flex items-center group/slider">
+                  <div className="flex-1 relative flex items-center">
                     <input
                       type="range"
                       min="1"
@@ -228,7 +217,7 @@ export default function HelperSearch() {
             </div>
           </div>
 
-          {/* Search Button Column */}
+          {/* Search Button */}
           <div className="md:col-span-12 lg:col-span-3 p-2">
             <button
               onClick={() => handleSearch()}
@@ -248,9 +237,12 @@ export default function HelperSearch() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {isManualSearch
-              ? (helpers.length > 0 ? `Found ${helpers.length} Professionals` : 'No Professionals Found')
-              : (detectedCity ? `Top Rated Professionals in ${detectedCity}` : 'Top Rated Professionals')
-            }
+              ? helpers.length > 0
+                ? `Found ${helpers.length} Professionals`
+                : 'No Professionals Found'
+              : detectedCity
+                ? `Top Rated Professionals in ${detectedCity}`
+                : 'Top Rated Professionals'}
           </h2>
 
           <div className="flex bg-gray-100 p-1 rounded-xl">
@@ -284,7 +276,6 @@ export default function HelperSearch() {
               </div>
             )}
 
-
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-600">
                 <p className="font-medium">Unable to load professionals.</p>
@@ -306,15 +297,17 @@ export default function HelperSearch() {
               </div>
             )}
 
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {helpers.map((helper: any) => (
-                <div key={helper.id} className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full">
+                <div
+                  key={helper.id}
+                  className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full"
+                >
                   <div className="flex items-start justify-between mb-4">
                     <div className="relative">
                       <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50">
                         {helper.profileImage ? (
-                          <img src={helper.profileImage} alt={helper.fullName} className="w-full h-full object-cover" />
+                          <img src={getMediaUrl(helper.profileImage)} alt={helper.fullName} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold text-xl">
                             {helper.fullName?.[0]}
@@ -366,19 +359,18 @@ export default function HelperSearch() {
           </>
         )}
       </div>
+
+      {/* Location Modal */}
       <LocationPermissionsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onDetect={detectLocation}
+        onSuccess={handleLocationSuccess}
         onManualSelect={(loc) => {
           setLocation(loc);
           setUserLocation(null);
           setIsNearByActive(false);
           handleSearch(loc);
-          setIsModalOpen(false);
         }}
-        isDetecting={isDetecting}
-        error={locationError}
       />
     </div>
   );

@@ -9,7 +9,8 @@ import { useWallet } from '@/features/wallet/hooks/useWallet';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuthStore();
-  const { data: wallet } = useWallet();
+   const isHelper = user?.userType === 'helper';
+  const { data: wallet } = useWallet({ enabled: isHelper });
 
   return (
     <nav className="fixed w-full z-50 glass border-b border-gray-200">

@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { Star, Navigation, Map as MapIcon, ExternalLink } from 'lucide-react';
+import { getMediaUrl } from '@/utils/url';
 
 // Fix for default marker icons in Leaflet with Next.js
 const DefaultIcon = L.icon({
@@ -167,7 +168,7 @@ export default function HelperMap({ helpers = [], userLocation, center = { lat: 
                                         <div className="flex items-center gap-3 mb-3 border-b pb-2">
                                             <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-50 ring-2 ring-blue-100 shadow-sm">
                                                 {helper.profileImage ? (
-                                                    <img src={helper.profileImage} alt={helper.fullName} className="w-full h-full object-cover" />
+                                                    <img src={getMediaUrl(helper.profileImage)} alt={helper.fullName} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-blue-600 font-bold text-lg">
                                                         {helper.fullName?.[0]}
