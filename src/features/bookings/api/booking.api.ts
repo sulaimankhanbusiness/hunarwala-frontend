@@ -1,11 +1,15 @@
 import api from '@/lib/api';
-import type { Booking, CreateBookingPayload } from '../types/booking.types';
+import type { Booking, CreateBookingPayload, CreateBroadcastPayload } from '../types/booking.types';
 
 const BOOKING_BASE_URL = '/bookings';
 
 export const bookingApi = {
     createBooking: async (payload: CreateBookingPayload): Promise<Booking> => {
         return api.post(BOOKING_BASE_URL, payload);
+    },
+
+    createBroadcastBooking: async (payload: CreateBroadcastPayload): Promise<Booking> => {
+        return api.post(`${BOOKING_BASE_URL}/broadcast`, payload);
     },
 
     getMyBookings: async (type?: string): Promise<Booking[]> => {

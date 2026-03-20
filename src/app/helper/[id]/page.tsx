@@ -143,13 +143,6 @@ export default function HelperProfile() {
                 <CalendarCheck size={20} />
                 Book Now
               </button>
-              <a
-                href={`tel:${helper.phoneNumber}`}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"
-              >
-                <Phone size={20} />
-                Call Now
-              </a>
               <button
                 onClick={handleChatNow}
                 className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 flex items-center gap-2 text-center"

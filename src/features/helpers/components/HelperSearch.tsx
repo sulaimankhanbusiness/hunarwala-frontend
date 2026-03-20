@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getHelpers, getTopRatedProfessionals } from '../services/helpers.service';
 import { reverseGeocode } from '@/features/location/services/location.service';
-import { Star, Shield, Award, Search, MapPin, Target, Loader2 } from 'lucide-react';
+import { Star, Shield, Award, Search, MapPin, Target, Loader2, CheckCircle2, UserPlus, Briefcase } from 'lucide-react';
 
 import Link from 'next/link';
 import CitySelect from '@/features/location/components/CitySelect';
@@ -13,6 +13,8 @@ import SkillSelect from '@/features/skills/components/SkillSelect';
 import dynamic from 'next/dynamic';
 import LocationPermissionsModal from '@/features/location/components/LocationPermissionsModal';
 import { getMediaUrl } from '@/utils/url';
+import { BookingForm } from '@/features/bookings/components/BookingForm';
+import { SimpleModal } from '@/components/SimpleModal';
 
 const HelperMap = dynamic(() => import('./HelperMap'), {
   ssr: false,
@@ -29,6 +31,8 @@ export default function HelperSearch() {
 
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
   const [isCityDetecting, setIsCityDetecting] = useState(false);
+  const [selectedHelperIds, setSelectedHelperIds] = useState<string[]>([]);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [searchParams, setSearchParams] = useState<{
@@ -99,6 +103,15 @@ export default function HelperSearch() {
     setIsNearByActive(false);
     setUserLocation(null);
     setSearchParams({});
+    setSelectedHelperIds([]);
+  };
+
+  const toggleHelperSelection = (helperId: string) => {
+    setSelectedHelperIds(prev =>
+      prev.includes(helperId)
+        ? prev.filter(id => id !== helperId)
+        : [...prev, helperId]
+    );
   };
 
   // Called by the "Near Me" button in the search bar (not the modal)
@@ -177,8 +190,8 @@ export default function HelperSearch() {
                 <button
                   onClick={handleNearMeClick}
                   className={`text-[10px] font-bold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-300 ${isNearByActive
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
-                      : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                     }`}
                 >
                   <Target size={10} />
@@ -304,18 +317,29 @@ export default function HelperSearch() {
                   className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="relative">
-                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50">
-                        {helper.profileImage ? (
-                          <img src={getMediaUrl(helper.profileImage)} alt={helper.fullName} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold text-xl">
-                            {helper.fullName?.[0]}
-                          </div>
-                        )}
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white" title="Verified Pro">
-                        <Shield size={12} fill="currentColor" />
+                    <div className="relative flex items-center gap-3">
+                      <button
+                        onClick={() => toggleHelperSelection(helper.id)}
+                        className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${selectedHelperIds.includes(helper.id)
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'border-gray-200 text-transparent hover:border-blue-400'
+                          }`}
+                      >
+                        <CheckCircle2 size={14} fill="currentColor" />
+                      </button>
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md ring-2 ring-blue-50">
+                          {helper.profileImage ? (
+                            <img src={getMediaUrl(helper.profileImage)} alt={helper.fullName} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold text-xl">
+                              {helper.fullName?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white" title="Verified Pro">
+                          <Shield size={12} fill="currentColor" />
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
@@ -359,6 +383,58 @@ export default function HelperSearch() {
           </>
         )}
       </div>
+
+      {/* Floating Bulk Action Bar */}
+      {selectedHelperIds.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-10 duration-500">
+          <div className="bg-white/90 backdrop-blur-xl border border-blue-100 px-6 py-4 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black shadow-lg shadow-blue-200">
+                {selectedHelperIds.length}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900 leading-none">Selected</p>
+                <p className="text-[10px] text-gray-500 font-medium">Pros chosen for booking</p>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-gray-100" />
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedHelperIds([])}
+                className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => setIsBookingModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-black text-sm transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center gap-2"
+              >
+                <Briefcase size={16} />
+                Book Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Booking Modal */}
+      <SimpleModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        title="Broadcast Booking Request"
+      >
+        <BookingForm
+          helperIds={selectedHelperIds}
+          helperName={`${selectedHelperIds.length} Selected Professionals`}
+          onSuccess={() => {
+            setIsBookingModalOpen(false);
+            setSelectedHelperIds([]);
+          }}
+          onCancel={() => setIsBookingModalOpen(false)}
+        />
+      </SimpleModal>
 
       {/* Location Modal */}
       <LocationPermissionsModal

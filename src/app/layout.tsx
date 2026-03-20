@@ -5,6 +5,7 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import { ToasterProvider } from "@/components/providers/ToasterProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { AuthRouteWatcher } from "@/components/providers/AuthRouteWatcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,13 +34,15 @@ export default function RootLayout({
       >
         <QueryProvider>
           <ToasterProvider />
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow pt-16">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <AuthRouteWatcher>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow pt-16">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </AuthRouteWatcher>
         </QueryProvider>
       </body>
     </html>

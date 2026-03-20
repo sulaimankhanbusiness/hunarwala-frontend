@@ -6,6 +6,7 @@ export enum BookingStatus {
     SETTLED = 'SETTLED',
     CANCELLED = 'CANCELLED',
     DISPUTE = 'DISPUTE',
+    EXPIRED = 'EXPIRED',
 }
 
 export enum CancelledBy {
@@ -54,6 +55,7 @@ export interface Booking {
         id: string;
         fullName: string;
         email: string;
+        phoneNumber?: string;
     };
     helper?: {
         id: string;
@@ -61,6 +63,7 @@ export interface Booking {
         user: {
             fullName: string;
             profileImage?: string;
+            phoneNumber?: string;
         };
     };
     review?: Review;
@@ -68,6 +71,13 @@ export interface Booking {
 
 export interface CreateBookingPayload {
     helperId: string;
+    serviceDescription: string;
+    scheduledAt: string;
+    estimatedPrice: number;
+}
+
+export interface CreateBroadcastPayload {
+    helperIds: string[];
     serviceDescription: string;
     scheduledAt: string;
     estimatedPrice: number;

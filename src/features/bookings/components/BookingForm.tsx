@@ -5,13 +5,14 @@ import { bookingApi } from '../api/booking.api';
 import { Calendar, Clock, PenTool, DollarSign, Loader2 } from 'lucide-react';
 
 interface BookingFormProps {
-    helperId: string;
+    helperId?: string;
+    helperIds?: string[];
     helperName: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export const BookingForm = ({ helperId, helperName, onSuccess, onCancel }: BookingFormProps) => {
+export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCancel }: BookingFormProps) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -28,13 +29,27 @@ export const BookingForm = ({ helperId, helperName, onSuccess, onCancel }: Booki
 
         try {
             const scheduledAt = new Date(`${formData.scheduledDate}T${formData.scheduledTime}`).toISOString();
+            const estimatedPrice = parseFloat(formData.estimatedPrice);
 
-            await bookingApi.createBooking({
-                helperId,
-                serviceDescription: formData.serviceDescription,
-                scheduledAt,
-                estimatedPrice: parseFloat(formData.estimatedPrice),
-            });
+            if (helperIds && helperIds.length > 0) {
+                // MULTI-HELPER BROADCAST FLOW
+                await bookingApi.createBroadcastBooking({
+                    helperIds,
+                    serviceDescription: formData.serviceDescription,
+                    scheduledAt,
+                    estimatedPrice,
+                });
+            } else if (helperId) {
+                // SINGLE HELPER BOOKING FLOW
+                await bookingApi.createBooking({
+                    helperId,
+                    serviceDescription: formData.serviceDescription,
+                    scheduledAt,
+                    estimatedPrice,
+                });
+            } else {
+                throw new Error('No helpers selected for booking');
+            }
 
             onSuccess();
         } catch (err: any) {
@@ -58,8 +73,14 @@ export const BookingForm = ({ helperId, helperName, onSuccess, onCancel }: Booki
                     <PenTool className="w-4 h-4" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-blue-900">Booking for {helperName}</p>
-                    <p className="text-xs text-blue-700">Fill in the details to request a service.</p>
+                    <p className="text-sm font-bold text-blue-900 leading-tight">
+                        {helperIds && helperIds.length > 1 ? `Broadcast to ${helperIds.length} Pros` : `Booking for ${helperName}`}
+                    </p>
+                    <p className="text-[11px] text-blue-700 mt-0.5">
+                        {helperIds && helperIds.length > 1
+                            ? "We'll notify all selected professionals. The first one to accept gets the job!"
+                            : "Provide job details to send a request."}
+                    </p>
                 </div>
             </div>
 

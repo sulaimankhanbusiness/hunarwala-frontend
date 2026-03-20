@@ -18,7 +18,8 @@ import {
     User,
     DollarSign,
     Loader2,
-    Star
+    Star,
+    Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/utils/error';
@@ -140,6 +141,7 @@ export const BookingCard = ({ booking, role, onUpdate }: BookingCardProps) => {
             [BookingStatus.SETTLED]: 'bg-green-100 text-green-700 border-green-200',
             [BookingStatus.CANCELLED]: 'bg-gray-100 text-gray-700 border-gray-200',
             [BookingStatus.DISPUTE]: 'bg-orange-100 text-orange-700 border-orange-200',
+            [BookingStatus.EXPIRED]: 'bg-red-100 text-red-700 border-red-200',
         };
 
         return (
@@ -163,14 +165,13 @@ export const BookingCard = ({ booking, role, onUpdate }: BookingCardProps) => {
                     </div>
                     <div>
                         <h4 className="text-sm font-bold text-gray-900 leading-tight">
-                            {role === 'client' ? booking.helper?.user?.fullName : booking.user?.fullName}
+                            {role === 'client' ? (booking.helper?.user?.fullName || 'Awaiting Helper') : booking.user?.fullName}
                         </h4>
                         <p className="text-[10px] text-gray-500 font-medium">
                             Booked on {new Date(booking.createdAt).toLocaleDateString()}
                         </p>
                     </div>
                 </div>
-                <StatusBadge status={booking.status} />
             </div>
 
             {/* Body info */}
@@ -198,6 +199,15 @@ export const BookingCard = ({ booking, role, onUpdate }: BookingCardProps) => {
                         <div className="flex-1">
                             <p className="text-[10px] text-orange-600 font-black uppercase tracking-wider">Dispute Reason</p>
                             <p className="text-xs text-orange-700 font-medium mt-0.5 leading-relaxed">{booking.disputeReason}</p>
+                        </div>
+                    </div>
+                )}
+                {booking.status === BookingStatus.EXPIRED && (
+                    <div className="bg-red-50/50 rounded-xl p-3 border border-red-100 flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
+                        <AlertCircle className="w-3.5 h-3.5 text-red-500 mt-0.5" />
+                        <div className="flex-1">
+                            <p className="text-[10px] text-red-600 font-black uppercase tracking-wider">Expired</p>
+                            <p className="text-xs text-red-700 font-medium mt-0.5 leading-relaxed">This booking request has expired because it was not accepted within 15 minutes.</p>
                         </div>
                     </div>
                 )}
@@ -440,6 +450,17 @@ export const BookingCard = ({ booking, role, onUpdate }: BookingCardProps) => {
                                 )}
                             </div>
                         )}
+                        {/* SHARED ACTIONS: PHONE CALL */}
+                        {(booking.status === BookingStatus.ACCEPTED ||
+                            booking.status === BookingStatus.IN_PROGRESS ||
+                            booking.status === BookingStatus.COMPLETED ) && (
+                                <a
+                                    href={`tel:${role === 'client' ? booking.helper?.user?.phoneNumber : booking.user?.phoneNumber}`}
+                                    className="w-full bg-blue-600 text-white text-[11px] font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-100 flex items-center justify-center gap-1.5"
+                                >
+                                    <Phone className="w-3.5 h-3.5" /> Call Now
+                                </a>
+                            )}
                     </>
                 )}
             </div>
@@ -481,6 +502,6 @@ export const BookingCard = ({ booking, role, onUpdate }: BookingCardProps) => {
                 bookingId={booking.id}
                 onSuccess={() => onUpdate()}
             />
-        </div>
+        </div >
     );
 };
