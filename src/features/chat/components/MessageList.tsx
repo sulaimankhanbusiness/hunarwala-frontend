@@ -65,7 +65,7 @@ export const MessageList = ({ chatId, currentUserId, onEdit, onDelete, onReply }
     }
 
     return (
-        <div ref={containerRef} className="flex-1 overflow-y-auto bg-gray-50 px-4 py-4">
+        <div ref={containerRef} className="height-80-vh overflow-y-auto bg-gray-50 px-4 py-4">
             {/* Load more indicator */}
             <div ref={observerTarget} className="h-4 flex items-center justify-center">
                 {isFetchingNextPage && (

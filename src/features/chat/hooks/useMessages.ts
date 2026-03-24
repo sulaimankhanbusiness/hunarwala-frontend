@@ -15,6 +15,5 @@ export const useMessages = (chatId: string | null, limit = 50) => {
         enabled: !!chatId,
         staleTime: 1000 * 30, // 30 seconds
         refetchOnWindowFocus: false,
-        refetchInterval: 3000, // Refresh messages every 3 seconds for active chat
     });
 };

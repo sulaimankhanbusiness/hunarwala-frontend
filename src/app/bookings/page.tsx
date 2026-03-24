@@ -1,41 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
-import { bookingApi } from '@/features/bookings/api/booking.api';
-import { Booking } from '@/features/bookings/types/booking.types';
+import { useBookings } from '@/features/bookings/hooks/useBookings';
 import { BookingCard } from '@/features/bookings/components/BookingCard';
 import { Loader2, Briefcase, User as UserIcon, CalendarDays, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MyBookingsPage() {
     const { user, isAuthenticated } = useAuthStore();
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'client' | 'helper'>('client');
 
-    const fetchBookings = async (roleType: 'client' | 'helper' = activeTab) => {
-        try {
-            console.log('Fetching bookings for role:', roleType);
-            setLoading(true);
-            const data = await bookingApi.getMyBookings(roleType);
-            console.log('Bookings received:', data.length, data);
-            setBookings(data);
-        } catch (err) {
-            console.error('Failed to fetch bookings', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchBookings(activeTab);
-        }
-    }, [isAuthenticated, activeTab]);
+    const { data: bookings = [], isLoading, refetch } = useBookings(activeTab);
 
     // Initial tab based on user type if possible
-    useEffect(() => {
+    React.useEffect(() => {
         if (user?.userType === 'helper') {
             setActiveTab('helper');
         }
@@ -93,7 +72,7 @@ export default function MyBookingsPage() {
                 </div>
             </header>
 
-            {loading ? (
+            {isLoading ? (
                 <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-4">
                     <div className="relative">
                         <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
@@ -110,7 +89,7 @@ export default function MyBookingsPage() {
                             key={booking.id}
                             booking={booking}
                             role={activeTab}
-                            onUpdate={fetchBookings}
+                            onUpdate={refetch}
                         />
                     ))}
                 </div>

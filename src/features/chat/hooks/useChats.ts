@@ -14,7 +14,6 @@ export const useChats = (limit = 20) => {
         initialPageParam: 1,
         staleTime: 1000 * 60, // 1 minute
         refetchOnWindowFocus: true,
-        refetchInterval: 10000, // Refresh chat list every 10 seconds
     });
 };
 
