@@ -6,6 +6,7 @@ import { useChatStore } from '@/features/chat/store/chatStore';
 import { useChatById } from '@/features/chat/hooks/useChats';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 function ChatsContent() {
     const [currentUserId, setCurrentUserId] = useState<string>('');
@@ -43,17 +44,20 @@ function ChatsContent() {
 
     if (!currentUserId) {
         return (
-            <div className="h-screen flex items-center justify-center bg-white">
-                <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading your conversations...</p>
+            <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-[#F8FAFC]">
+                <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse" />
+                        <Loader2 className="w-12 h-12 text-blue-600 animate-spin relative z-10" />
+                    </div>
+                    <p className="mt-6 text-gray-500 font-bold uppercase tracking-widest text-[10px]">Initializing Chat...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="h-screen flex overflow-hidden bg-white">
+        <div className="h-[calc(100vh-4rem)] flex overflow-hidden bg-white">
             {/* Chat List - Hidden on mobile when chat is open */}
             <div className={`
         w-full lg:w-80 xl:w-96 flex-shrink-0 border-r border-gray-200
@@ -64,9 +68,9 @@ function ChatsContent() {
 
             {/* Chat Window - Hidden on mobile when chat list is shown */}
             <div className={`
-        flex-1
-        ${isMobileChatOpen ? 'block' : 'hidden lg:block'}
-      `}>
+                flex-1 flex flex-col min-h-0
+                ${isMobileChatOpen ? 'block' : 'hidden lg:block'}
+            `}>
                 <ChatWindow currentUserId={currentUserId} />
             </div>
         </div>
@@ -76,7 +80,7 @@ function ChatsContent() {
 export default function ChatsPage() {
     return (
         <Suspense fallback={
-            <div className="h-screen flex items-center justify-center bg-white">
+            <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-white">
                 <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                     <p className="text-gray-600 font-medium">Loading...</p>

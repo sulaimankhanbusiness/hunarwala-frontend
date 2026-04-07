@@ -17,8 +17,8 @@ export const ChatHeader = ({ currentUserId }: ChatHeaderProps) => {
     const otherUser = getOtherUser(activeChat);
 
     return (
-        <div className="px-4 py-3 bg-white border-b border-gray-200 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="px-6 py-4 glass h-16 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
+            <div className="flex items-center gap-4">
                 {/* Back button (mobile) */}
                 <button
                     onClick={() => setMobileChatOpen(false)}
@@ -28,14 +28,17 @@ export const ChatHeader = ({ currentUserId }: ChatHeaderProps) => {
                 </button>
 
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm shadow-blue-200">
                     {otherUser?.fullName?.charAt(0).toUpperCase() || '?'}
                 </div>
 
                 {/* User Info */}
                 <div>
-                    <h3 className="font-semibold text-gray-900">{otherUser?.fullName || 'Unknown User'}</h3>
-                    <p className="text-xs text-gray-500">Active now</p>
+                    <h3 className="font-bold text-gray-900 leading-tight">{otherUser?.fullName || 'Unknown User'}</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Active now</p>
+                    </div>
                 </div>
             </div>
 

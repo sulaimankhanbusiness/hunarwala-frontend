@@ -44,29 +44,31 @@ export const ChatList = ({ currentUserId }: ChatListProps) => {
         : allChats;
 
     return (
-        <div className="flex flex-col h-full bg-white border-r border-gray-200">
+        <div className="flex flex-col h-full bg-[#F8FAFC] border-r border-gray-100">
             {/* Header */}
-            <div className="px-4 py-4 border-b border-gray-200 bg-white">
-                <h2 className="text-2xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <MessageCircle className="w-6 h-6 text-blue-500" />
+            <div className="px-6 py-6 border-b border-gray-100 glass sticky top-0 z-10">
+                <h2 className="text-2xl font-extrabold text-gray-900 mb-4 flex items-center gap-3">
+                    <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-200">
+                        <MessageCircle className="w-6 h-6 text-white" />
+                    </div>
                     Messages
                 </h2>
 
                 {/* Search */}
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <div className="relative group">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                     <input
                         type="text"
                         placeholder="Search conversations..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                        className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-100 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm placeholder:text-gray-400"
                     />
                 </div>
             </div>
 
             {/* Chat List */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-32">
                         <Loader2 className="w-6 h-6 animate-spin text-blue-500" />

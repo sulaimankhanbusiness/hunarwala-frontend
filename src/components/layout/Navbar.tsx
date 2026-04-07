@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Menu, X, Wallet, CreditCard } from 'lucide-react';
+import { Menu, X, Wallet, CreditCard, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import { NotificationCenter } from '../NotificationCenter';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
@@ -9,7 +9,7 @@ import { useWallet } from '@/features/wallet/hooks/useWallet';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuthStore();
-   const isHelper = user?.userType === 'helper';
+  const isHelper = user?.userType === 'helper';
   const { data: wallet } = useWallet({ enabled: isHelper });
 
   return (
@@ -26,7 +26,13 @@ export default function Navbar() {
             <Link href="/services" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Services</Link>
             <Link href="/how-it-works" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">How it Works</Link>
             {user && (
-              <Link href="/bookings" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">My Bookings</Link>
+              <>
+                <Link href="/bookings" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">My Bookings</Link>
+                <Link href="/chats" className="text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-2">
+                  <MessageSquare size={18} className="text-blue-500" />
+                  Messages
+                </Link>
+              </>
             )}
             {user?.userType === 'helper' && (
               <Link href="/wallet" className="text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-2">
@@ -95,12 +101,20 @@ export default function Navbar() {
               How it Works
             </Link>
             {user && (
-              <Link
-                href="/bookings"
-                className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              >
-                My Bookings
-              </Link>
+              <>
+                <Link
+                  href="/bookings"
+                  className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                >
+                  My Bookings
+                </Link>
+                <Link
+                  href="/chats"
+                  className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                >
+                  Messages
+                </Link>
+              </>
             )}
             {user?.userType === 'helper' && (
               <Link

@@ -20,7 +20,7 @@ export interface Message {
     chatId: string;
     senderUserId: string;
     content: string;
-    contentType: 'text' | 'image' | 'file' | 'video' | 'audio';
+    contentType: 'text' | 'image' | 'file' | 'video' | 'audio' | 'location';
     replyToMessageId?: string;
     replyToMessage?: Message;
     attachments?: Attachment[];
@@ -59,7 +59,7 @@ export interface PaginatedMessages {
 
 export interface SendMessagePayload {
     content: string;
-    contentType?: 'text' | 'image' | 'file' | 'video' | 'audio';
+    contentType?: 'text' | 'image' | 'file' | 'video' | 'audio' | 'location';
     replyToMessageId?: string;
     attachments?: Attachment[];
     metadata?: any;

@@ -1,18 +1,20 @@
-'use client';
-
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { useChatStore } from '../store/chatStore';
-import { Send, X, Paperclip, Smile } from 'lucide-react';
-import type { Message } from '../types/chat.types';
+import { Send, X, Paperclip, MapPin, Loader2 } from 'lucide-react';
+import { EmojiPicker } from './EmojiPicker';
+import { getCurrentCoordinates, reverseGeocode } from '@/features/location/services/location.service';
+import { toast } from 'sonner';
+import clsx from 'clsx';
 
 interface MessageInputProps {
-    onSend: (content: string, replyToId?: string) => void;
+    onSend: (content: string, replyToId?: string, contentType?: 'text' | 'location', metadata?: any) => void;
     onEdit?: (messageId: string, content: string) => void;
     disabled?: boolean;
 }
 
 export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) => {
     const [message, setMessage] = useState('');
+    const [isLocating, setIsLocating] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const replyingTo = useChatStore((state) => state.replyingTo);
@@ -54,6 +56,48 @@ export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) =>
         }
     };
 
+    const handleEmojiSelect = (emoji: string) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newText = message.substring(0, start) + emoji + message.substring(end);
+
+        setMessage(newText);
+
+        // Return focus and set cursor position
+        setTimeout(() => {
+            textarea.focus();
+            const newPos = start + emoji.length;
+            textarea.setSelectionRange(newPos, newPos);
+        }, 0);
+    };
+
+    const handleShareLocation = async () => {
+        setIsLocating(true);
+        try {
+            const position = await getCurrentCoordinates();
+            const { latitude, longitude } = position.coords;
+
+            const geocodeData = await reverseGeocode(latitude, longitude);
+            const address = geocodeData.display_name || geocodeData.address?.city || 'Selected Location';
+
+            onSend(`Shared Location: ${address}`, replyingTo?.id, 'location', {
+                lat: latitude,
+                lng: longitude,
+                address
+            });
+
+            toast.success('Location shared!');
+        } catch (error: any) {
+            console.error('Location error:', error);
+            toast.error(error.message || 'Failed to get location');
+        } finally {
+            setIsLocating(false);
+        }
+    };
+
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -71,40 +115,52 @@ export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) =>
     };
 
     return (
-        <div className="border-t border-gray-200 bg-white">
+        <div className="border-t border-gray-100 bg-[#F8FAFC]/50 backdrop-blur-md pb-safe">
             {/* Reply/Edit Preview */}
             {(replyingTo || editingMessage) && (
-                <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+                <div className="px-6 py-3 bg-blue-50/80 backdrop-blur-sm border-b border-blue-100 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-blue-600">
-                            {editingMessage ? 'Editing message' : `Replying to ${replyingTo?.sender?.name || 'Unknown'}`}
+                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-0.5">
+                            {editingMessage ? 'Editing message' : `Replying to ${replyingTo?.sender?.fullName || 'Unknown'}`}
                         </p>
-                        <p className="text-sm text-gray-700 truncate">
+                        <p className="text-sm text-gray-700 truncate font-medium">
                             {editingMessage ? editingMessage.content : replyingTo?.content}
                         </p>
                     </div>
                     <button
                         onClick={handleCancel}
-                        className="ml-2 p-1 hover:bg-blue-100 rounded-full transition-colors"
+                        className="ml-4 p-1.5 hover:bg-blue-100 rounded-full transition-colors group"
                     >
-                        <X className="w-4 h-4 text-gray-600" />
+                        <X className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                     </button>
                 </div>
             )}
 
             {/* Input Area */}
-            <div className="px-4 py-3 flex items-end gap-2">
-                {/* Attachment Button (placeholder) */}
-                <button
-                    disabled={disabled}
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-                    title="Attach file (coming soon)"
-                >
-                    <Paperclip className="w-5 h-5" />
-                </button>
+            <div className="px-6 py-4 flex items-end gap-3 max-w-6xl mx-auto w-full">
+                <div className="flex items-center gap-1 mb-1">
+                    {/* Attachment Button */}
+                    <button
+                        disabled={disabled}
+                        className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all disabled:opacity-50"
+                        title="Attach file (coming soon)"
+                    >
+                        <Paperclip className="w-5 h-5" />
+                    </button>
+
+                    {/* Location Button */}
+                    <button
+                        onClick={handleShareLocation}
+                        disabled={disabled || isLocating}
+                        className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all disabled:opacity-50"
+                        title="Share location"
+                    >
+                        {isLocating ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
+                    </button>
+                </div>
 
                 {/* Text Input */}
-                <div className="flex-1 relative">
+                <div className="flex-1 relative flex items-end group">
                     <textarea
                         ref={textareaRef}
                         value={message}
@@ -113,27 +169,27 @@ export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) =>
                         placeholder="Type a message..."
                         disabled={disabled}
                         rows={1}
-                        className="w-full px-4 py-2 pr-10 bg-gray-100 border border-transparent rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ maxHeight: '120px' }}
+                        className="w-full px-5 py-3 pr-12 bg-white border border-gray-100 rounded-2xl shadow-sm resize-none focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all text-sm leading-relaxed placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ maxHeight: '150px' }}
                     />
 
-                    {/* Emoji Button (placeholder) */}
-                    <button
-                        disabled={disabled}
-                        className="absolute right-2 bottom-2 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50"
-                        title="Emoji (coming soon)"
-                    >
-                        <Smile className="w-5 h-5" />
-                    </button>
+                    <div className="absolute right-2 bottom-2">
+                        <EmojiPicker onSelect={handleEmojiSelect} disabled={disabled} />
+                    </div>
                 </div>
 
                 {/* Send Button */}
                 <button
                     onClick={handleSend}
                     disabled={!message.trim() || disabled}
-                    className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
+                    className={clsx(
+                        "p-3 rounded-2xl transition-all duration-300 shadow-lg mb-0.5",
+                        message.trim() && !disabled
+                            ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-blue-200 hover:scale-105 active:scale-95"
+                            : "bg-gray-100 text-gray-300 shadow-none grayscale"
+                    )}
                 >
-                    <Send className="w-5 h-5" />
+                    <Send className={clsx("w-5 h-5", message.trim() && "animate-in fade-in zoom-in-75")} />
                 </button>
             </div>
         </div>

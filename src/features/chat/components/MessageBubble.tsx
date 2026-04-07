@@ -3,7 +3,7 @@
 import { useChatStore } from '../store/chatStore';
 import type { Message } from '../types/chat.types';
 import { formatMessageTime } from '../utils/formatTime';
-import { Check, CheckCheck, Edit2, Reply, Trash2, MoreVertical } from 'lucide-react';
+import { Check, CheckCheck, Edit2, Reply, Trash2, MoreVertical, MapPin } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 
@@ -62,8 +62,8 @@ export const MessageBubble = ({
     };
 
     return (
-        <div className={clsx('flex mb-4 group', isOwn ? 'justify-end' : 'justify-start')}>
-            <div className={clsx('flex gap-2 max-w-[70%]', isOwn ? 'flex-row-reverse' : 'flex-row')}>
+        <div className={clsx('flex mb-4 group animate-message-in', isOwn ? 'justify-end' : 'justify-start')}>
+            <div className={clsx('flex gap-2 max-w-[80%]', isOwn ? 'flex-row-reverse' : 'flex-row')}>
                 {/* Avatar */}
                 {showAvatar && !isOwn && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white text-sm font-semibold">
@@ -87,19 +87,43 @@ export const MessageBubble = ({
                         </div>
                     )}
 
-                    {/* Message Bubble */}
+                    {/* Message Bubble & Actions */}
                     <div className="relative">
                         <div
                             className={clsx(
-                                'px-4 py-2 rounded-lg shadow-sm',
+                                'px-4 py-2.5 shadow-sm transition-all duration-200',
                                 isOwn
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 text-gray-900',
-                                message.replyToMessage ? 'rounded-tl-none' : ''
+                                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm shadow-blue-200/50'
+                                    : 'bg-white text-gray-900 border border-gray-100 rounded-2xl rounded-tl-sm shadow-gray-200/50',
+                                message.replyToMessage ? (isOwn ? 'rounded-tr-none' : 'rounded-tl-none') : ''
                             )}
                         >
                             {/* Content */}
-                            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                            {message.contentType === 'location' ? (
+                                <div className="space-y-2 py-1 min-w-[200px]">
+                                    <div className="flex items-start gap-2">
+                                        <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                        <p className="text-sm font-medium leading-tight">
+                                            {message.content.replace('Shared Location: ', '')}
+                                        </p>
+                                    </div>
+                                    <a
+                                        href={`https://www.google.com/maps/search/?api=1&query=${message.metadata?.lat},${message.metadata?.lng}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={clsx(
+                                            "block w-full text-center py-2 px-3 rounded-md text-xs font-bold transition-all shadow-sm",
+                                            isOwn
+                                                ? "bg-white text-blue-600 hover:bg-blue-50"
+                                                : "bg-blue-600 text-white hover:bg-blue-700"
+                                        )}
+                                    >
+                                        View on Map
+                                    </a>
+                                </div>
+                            ) : (
+                                <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                            )}
 
                             {/* Attachments */}
                             {message.attachments && message.attachments.length > 0 && (

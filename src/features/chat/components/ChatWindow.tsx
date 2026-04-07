@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import type { Message } from '../types/chat.types';
 
 interface ChatWindowProps {
-    currentUserId: string;
+    currentUserId: string; 
 }
 
 export const ChatWindow = ({ currentUserId }: ChatWindowProps) => {
@@ -31,13 +31,14 @@ export const ChatWindow = ({ currentUserId }: ChatWindowProps) => {
         }
     }, [activeChat?.id]);
 
-    const handleSendMessage = (content: string, replyToId?: string) => {
+    const handleSendMessage = (content: string, replyToId?: string, contentType: 'text' | 'location' = 'text', metadata?: any) => {
         if (!activeChat) return;
 
         sendMessageMutation.mutate({
             content,
-            contentType: 'text',
+            contentType,
             replyToMessageId: replyToId,
+            metadata,
         });
     };
 
@@ -83,9 +84,10 @@ export const ChatWindow = ({ currentUserId }: ChatWindowProps) => {
     }
 
     return (
-        <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 flex flex-col bg-white min-h-0">
             <ChatHeader currentUserId={currentUserId} />
 
+            <div className="flex-1 flex flex-col min-h-0">
             <MessageList
                 chatId={activeChat.id}
                 currentUserId={currentUserId}
@@ -99,6 +101,7 @@ export const ChatWindow = ({ currentUserId }: ChatWindowProps) => {
                 onEdit={handleEditMessage}
                 disabled={sendMessageMutation.isPending || editMessageMutation.isPending}
             />
+            </div>
         </div>
     );
 };
