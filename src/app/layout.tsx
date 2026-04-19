@@ -7,6 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthRouteWatcher } from "@/components/providers/AuthRouteWatcher";
 import { SocketProvider } from "@/components/providers/SocketProvider";
+import { NotificationsProvider } from "@/components/providers/NotificationsProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +22,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "HunarWala - Find Expert Helpers",
   description: "Connect with skilled professionals like Plumbers, Electricians, and more.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "HunarWala",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -30,6 +40,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content="#2563eb" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
       >
@@ -37,13 +52,15 @@ export default function RootLayout({
           <ToasterProvider />
           <AuthRouteWatcher>
             <SocketProvider>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-grow pt-16">
-                  {children}
-                </main>
-                <Footer />
-              </div>
+              <NotificationsProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-grow pt-16">
+                    {children}
+                  </main>
+                  <Footer />
+                </div>
+              </NotificationsProvider>
             </SocketProvider>
           </AuthRouteWatcher>
         </QueryProvider>

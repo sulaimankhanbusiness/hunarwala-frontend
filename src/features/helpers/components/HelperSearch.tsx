@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { Star, Shield, Award, Search, MapPin, Target, Loader2, CheckCircle2, Briefcase, ChevronDown, CalendarCheck } from 'lucide-react';
 
 import { getHelpers, getTopRatedProfessionals } from '../services/helpers.service';
 import { reverseGeocode } from '@/features/location/services/location.service';
-import { Star, Shield, Award, Search, MapPin, Target, Loader2, CheckCircle2, UserPlus, Briefcase } from 'lucide-react';
-
-import Link from 'next/link';
+import { getCachedLocation, setCachedLocation } from '@/features/location/utils/locationCache';
+import type { SortBy } from '../types/helpers.types';
 import CitySelect from '@/features/location/components/CitySelect';
 import SkillSelect from '@/features/skills/components/SkillSelect';
-import dynamic from 'next/dynamic';
 import LocationPermissionsModal from '@/features/location/components/LocationPermissionsModal';
 import { getMediaUrl } from '@/utils/url';
 import { BookingForm } from '@/features/bookings/components/BookingForm';
@@ -34,6 +35,8 @@ export default function HelperSearch() {
   const [selectedHelperIds, setSelectedHelperIds] = useState<string[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [singleBookingHelper, setSingleBookingHelper] = useState<{ id: string; name: string } | null>(null);
+  const [sortBy, setSortBy] = useState<SortBy>('rating');
 
   const [searchParams, setSearchParams] = useState<{
     skill?: string;
@@ -45,18 +48,36 @@ export default function HelperSearch() {
     radiusKm?: number;
   }>({});
 
-  // On mount: attempt silent city detection for the "Top Rated in <city>" header.
-  // If it fails for any reason, open the modal so the user can fix or pick manually.
+  // On mount: read ?skill= from the URL (e.g. navigating from the Services page)
+  // and pre-select + auto-search for that skill.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const skillParam = params.get('skill');
+    if (skillParam) {
+      setSkill(skillParam);
+      setSearchParams({ skill: skillParam });
+    }
+  }, []);
+
+  // On mount: resolve the city for the "Top Rated in <city>" header.
+  // Uses a 1-hour localStorage cache to avoid hitting the reverse-geocode API
+  // on every page load.
   useEffect(() => {
     const detectInitialCity = async () => {
-      // Dynamically import to keep location logic server-safe
+      // 1. Serve from cache if still fresh
+      const cached = getCachedLocation();
+      if (cached) {
+        setDetectedCity(cached.city);
+        return;
+      }
+
+      // 2. Dynamically import to keep location logic server-safe
       const { queryGeolocationPermission, getCurrentCoordinates } = await import(
         '@/features/location/services/location.service'
       );
 
       const { state } = await queryGeolocationPermission();
 
-      // If already denied or unsupported, skip the attempt and show the modal
       if (state === 'denied' || state === 'unsupported') {
         setIsModalOpen(true);
         return;
@@ -67,7 +88,10 @@ export default function HelperSearch() {
         const position = await getCurrentCoordinates();
         const { latitude, longitude } = position.coords;
         const data = await reverseGeocode(latitude, longitude);
-        if (data?.city) setDetectedCity(data.city);
+        if (data?.city) {
+          setDetectedCity(data.city);
+          setCachedLocation(data.city, latitude, longitude);
+        }
       } catch (err) {
         console.error('Initial city detection failed:', err);
         setIsModalOpen(true);
@@ -114,12 +138,10 @@ export default function HelperSearch() {
     );
   };
 
-  // Called by the "Near Me" button in the search bar (not the modal)
   const handleNearMeClick = () => {
     setIsModalOpen(true);
   };
 
-  // Called by the modal on successful geolocation
   const handleLocationSuccess = async (position: GeolocationPosition) => {
     const { latitude, longitude } = position.coords;
 
@@ -132,10 +154,12 @@ export default function HelperSearch() {
     if (skill) params.skill = skill;
     setSearchParams(params);
 
-    // Also resolve the city name for the heading
     try {
       const data = await reverseGeocode(latitude, longitude);
-      if (data?.city) setDetectedCity(data.city);
+      if (data?.city) {
+        setDetectedCity(data.city);
+        setCachedLocation(data.city, latitude, longitude);
+      }
     } catch {
       // Non-critical — heading just won't show city name
     }
@@ -154,8 +178,18 @@ export default function HelperSearch() {
   });
 
   const isManualSearch = Object.keys(searchParams).length > 0;
-  const helpers = isManualSearch ? (responseData?.items ?? []) : (topRatedData?.items ?? []);
+  const rawHelpers = isManualSearch ? (responseData?.items ?? []) : (topRatedData?.items ?? []);
   const isAnyLoading = isLoading || isTopRatedLoading || isCityDetecting;
+
+  const helpers = [...rawHelpers].sort((a: any, b: any) => {
+    switch (sortBy) {
+      case 'rating':      return (b.averageRating || 0) - (a.averageRating || 0);
+      case 'price_asc':   return (a.ratePerHour || 0) - (b.ratePerHour || 0);
+      case 'price_desc':  return (b.ratePerHour || 0) - (a.ratePerHour || 0);
+      case 'experience':  return (b.experienceYears || 0) - (a.experienceYears || 0);
+      default:            return 0;
+    }
+  });
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 -mt-10 relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -247,30 +281,48 @@ export default function HelperSearch() {
 
       {/* Results */}
       <div className="space-y-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-wrap gap-3 justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {isManualSearch
-              ? helpers.length > 0
-                ? `Found ${helpers.length} Professionals`
+              ? rawHelpers.length > 0
+                ? `Found ${rawHelpers.length} Professionals`
                 : 'No Professionals Found'
               : detectedCity
                 ? `Top Rated Professionals in ${detectedCity}`
                 : 'Top Rated Professionals'}
           </h2>
 
-          <div className="flex bg-gray-100 p-1 rounded-xl">
-            <button
-              onClick={() => setShowMap(false)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!showMap ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              List View
-            </button>
-            <button
-              onClick={() => setShowMap(true)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${showMap ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Map View
-            </button>
+          <div className="flex items-center gap-3">
+            {!showMap && (
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortBy)}
+                  className="appearance-none pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="rating">Top Rated</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                  <option value="experience">Most Experienced</option>
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            )}
+
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+              <button
+                onClick={() => setShowMap(false)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!showMap ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                List View
+              </button>
+              <button
+                onClick={() => setShowMap(true)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${showMap ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Map View
+              </button>
+            </div>
           </div>
         </div>
 
@@ -345,7 +397,7 @@ export default function HelperSearch() {
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg text-sm font-bold">
                         <Star size={14} fill="currentColor" className="text-amber-400" />
-                        <span>4.8</span>
+                        <span>{helper.averageRating ? Number(helper.averageRating).toFixed(1) : 'New'}</span>
                       </div>
                       <span className="text-xs text-gray-400 mt-1">{helper.jobsCompleted || 0} jobs completed</span>
                     </div>
@@ -371,12 +423,21 @@ export default function HelperSearch() {
                     </span>
                   </div>
 
-                  <Link
-                    href={`/helper/${helper.id}`}
-                    className="mt-6 w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 transition-all text-center text-sm"
-                  >
-                    View Profile
-                  </Link>
+                  <div className="mt-6 flex gap-2">
+                    <Link
+                      href={`/helper/${helper.id}`}
+                      className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 transition-all text-center text-sm"
+                    >
+                      View Profile
+                    </Link>
+                    <button
+                      onClick={() => setSingleBookingHelper({ id: helper.id, name: helper.fullName })}
+                      className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm flex items-center justify-center gap-1.5 shadow-sm shadow-blue-200"
+                    >
+                      <CalendarCheck size={15} />
+                      Book
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -418,6 +479,20 @@ export default function HelperSearch() {
           </div>
         </div>
       )}
+
+      {/* Single Booking Modal */}
+      <SimpleModal
+        isOpen={!!singleBookingHelper}
+        onClose={() => setSingleBookingHelper(null)}
+        title={`Book ${singleBookingHelper?.name || ''}`}
+      >
+        <BookingForm
+          helperIds={singleBookingHelper ? [singleBookingHelper.id] : []}
+          helperName={singleBookingHelper?.name || ''}
+          onSuccess={() => setSingleBookingHelper(null)}
+          onCancel={() => setSingleBookingHelper(null)}
+        />
+      </SimpleModal>
 
       {/* Bulk Booking Modal */}
       <SimpleModal

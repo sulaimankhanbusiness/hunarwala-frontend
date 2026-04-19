@@ -1,16 +1,30 @@
 'use client';
 import Link from 'next/link';
-import { Menu, X, Wallet, CreditCard, MessageSquare } from 'lucide-react';
+import { Menu, X, Wallet, CreditCard, MessageSquare, Briefcase } from 'lucide-react';
 import { useState } from 'react';
 import { NotificationCenter } from '../NotificationCenter';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { useWallet } from '@/features/wallet/hooks/useWallet';
+import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
+
+/** Small red badge pill — shows count or "9+" */
+function NavBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="absolute -top-2 -right-3 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1 shadow-sm ring-2 ring-white leading-none animate-in fade-in zoom-in duration-200">
+      {count > 9 ? '9+' : count}
+    </span>
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const isHelper = user?.userType === 'helper';
   const { data: wallet } = useWallet({ enabled: isHelper });
+
+  const unreadMessages = useNavBadgeStore((s) => s.unreadMessages);
+  const newBookings    = useNavBadgeStore((s) => s.newBookings);
 
   return (
     <nav className="fixed w-full z-50 glass border-b border-gray-200">
@@ -22,26 +36,44 @@ export default function Navbar() {
             </Link>
           </div>
 
+          {/* Desktop nav */}
           <div className="hidden md:flex space-x-8 items-center">
-            <Link href="/services" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Services</Link>
-            <Link href="/how-it-works" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">How it Works</Link>
+            <Link href="/services" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
+              Services
+            </Link>
+            <Link href="/how-it-works" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
+              How it Works
+            </Link>
+
             {user && (
               <>
-                <Link href="/bookings" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">My Bookings</Link>
-                <Link href="/chats" className="text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-2">
-                  <MessageSquare size={18} className="text-blue-500" />
+                {/* Bookings with badge */}
+                <Link
+                  href="/bookings"
+                  className="relative inline-flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                >
+                  <Briefcase size={16} className="text-blue-500" />
+                  My Bookings
+                  <NavBadge count={newBookings} />
+                </Link>
+
+                {/* Messages with badge */}
+                <Link
+                  href="/chats"
+                  className="relative inline-flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                >
+                  <MessageSquare size={16} className="text-blue-500" />
                   Messages
+                  <NavBadge count={unreadMessages} />
                 </Link>
               </>
             )}
+
             {user?.userType === 'helper' && (
               <Link href="/wallet" className="text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-2">
                 <Wallet size={18} className="text-blue-500" />
                 Wallet
               </Link>
-            )}
-            {user?.userType === 'admin' && (
-              <Link href="/admin/wallet" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Admin Dashboard</Link>
             )}
 
             {user ? (
@@ -76,7 +108,11 @@ export default function Navbar() {
             )}
           </div>
 
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center gap-3">
+            {/* Mobile badge summary — show a single red dot if any unread */}
+            {user && (unreadMessages > 0 || newBookings > 0) && (
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white animate-pulse" />
+            )}
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-gray-900">
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -91,47 +127,66 @@ export default function Navbar() {
             <Link
               href="/services"
               className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              onClick={() => setIsOpen(false)}
             >
               Services
             </Link>
             <Link
               href="/how-it-works"
               className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              onClick={() => setIsOpen(false)}
             >
               How it Works
             </Link>
+
             {user && (
               <>
+                {/* Bookings — mobile */}
                 <Link
                   href="/bookings"
-                  className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  className="flex items-center justify-between px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  onClick={() => setIsOpen(false)}
                 >
-                  My Bookings
+                  <span className="flex items-center gap-2">
+                    <Briefcase size={18} className="text-blue-500" />
+                    My Bookings
+                  </span>
+                  {newBookings > 0 && (
+                    <span className="bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                      {newBookings > 9 ? '9+' : newBookings} new
+                    </span>
+                  )}
                 </Link>
+
+                {/* Messages — mobile */}
                 <Link
                   href="/chats"
-                  className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  className="flex items-center justify-between px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  onClick={() => setIsOpen(false)}
                 >
-                  Messages
+                  <span className="flex items-center gap-2">
+                    <MessageSquare size={18} className="text-blue-500" />
+                    Messages
+                  </span>
+                  {unreadMessages > 0 && (
+                    <span className="bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                      {unreadMessages > 9 ? '9+' : unreadMessages} unread
+                    </span>
+                  )}
                 </Link>
               </>
             )}
+
             {user?.userType === 'helper' && (
               <Link
                 href="/wallet"
                 className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                onClick={() => setIsOpen(false)}
               >
                 My Wallet
               </Link>
             )}
-            {user?.userType === 'admin' && (
-              <Link
-                href="/admin/wallet"
-                className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              >
-                Admin Dashboard
-              </Link>
-            )}
+
             {user ? (
               <>
                 <div className="block px-3 py-3 text-base font-medium text-gray-500">

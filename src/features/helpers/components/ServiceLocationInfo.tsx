@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { reverseGeocode } from '@/features/location/services/location.service';
 import { toast } from 'sonner';
-import { getErrorMessage } from '@/utils/error';
-import LocationPicker from '@/features/location/components/LocationPicker';
 import { Loader2, Globe, Map as MapIcon, ChevronRight } from 'lucide-react';
+
+const LocationPicker = dynamic(() => import('@/features/location/components/LocationPicker'), {
+    ssr: false,
+    loading: () => <div className="h-[350px] w-full bg-gray-100 animate-pulse rounded-2xl" />,
+});
 import { useLocationStore } from '@/features/location/stores/useLocationStore';
 
 interface ServiceLocationInfoProps {

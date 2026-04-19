@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 
-const PROTECTED_ROUTES = ['/wallet', '/bookings', '/chats', '/admin', '/helper'];
+const PROTECTED_ROUTES = ['/wallet', '/bookings', '/chats'];
 
 export const AuthRouteWatcher = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();

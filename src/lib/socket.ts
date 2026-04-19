@@ -32,20 +32,20 @@ class SocketService {
         });
 
         this.socket.on('connect', () => {
-            console.log('[Socket] Connected to server');
-            // Re-register all listeners on reconnect
+            // Remove then re-add every listener to guarantee exactly-once registration.
+            // Without the off() call, listeners added before the socket connected would
+            // be registered a second time here, causing every event to fire twice.
             this.listeners.forEach((fns, event) => {
-                fns.forEach(fn => this.socket?.on(event, fn));
+                fns.forEach(fn => {
+                    this.socket?.off(event, fn);
+                    this.socket?.on(event, fn);
+                });
             });
         });
 
-        this.socket.on('disconnect', (reason: any) => {
-            console.log('[Socket] Disconnected:', reason);
-        });
+        this.socket.on('disconnect', (_reason: any) => { /* handled by reconnection logic */ });
 
-        this.socket.on('connect_error', (error: any) => {
-            console.error('[Socket] Connection error:', error.message);
-        });
+        this.socket.on('connect_error', (_error: any) => { /* silent — socket retries automatically */ });
     }
 
     public disconnect() {

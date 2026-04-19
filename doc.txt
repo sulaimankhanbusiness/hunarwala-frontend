@@ -1,2 +1,211 @@
-user flow regiration bug pls solve this when  
-this?
+PUSH notification implementation
+
+
+
+
+
+Now the frontend setup. Add these 3 files to your Next.js project:
+
+1. public/firebase-messaging-sw.js — service worker (handles notifications when browser/tab is closed)
+
+
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+});
+
+const messaging = firebase.messaging();
+
+// Background message handler (app closed / tab in background)
+messaging.onBackgroundMessage((payload) => {
+  const { title, body } = payload.notification;
+  self.registration.showNotification(title, {
+    body,
+    icon: '/logo.png',
+    data: payload.data,
+  });
+});
+2. src/lib/firebase.ts — Firebase client config
+
+
+import { initializeApp, getApps } from 'firebase/app';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+
+export const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
+
+export async function requestNotificationPermission(vapidKey: string): Promise<string | null> {
+  if (!messaging) return null;
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') return null;
+  return getToken(messaging, { vapidKey, serviceWorkerRegistration: await navigator.serviceWorker.register('/firebase-messaging-sw.js') });
+}
+
+export { onMessage };
+3. src/hooks/useNotifications.ts — call this once after login
+
+
+import { useEffect } from 'react';
+import { requestNotificationPermission, onMessage, messaging } from '@/lib/firebase';
+
+export function useNotifications(authToken: string | null) {
+  useEffect(() => {
+    if (!authToken || !('Notification' in window)) return;
+
+    requestNotificationPermission(process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY!)
+      .then((fcmToken) => {
+        if (!fcmToken) return;
+        // Save token to backend
+        fetch('/api/users/fcm-token', {   // adjust to your API base URL
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ token: fcmToken }),
+        });
+      });
+
+    // Foreground message handler (app is open)
+    if (messaging) {
+      return onMessage(messaging, (payload) => {
+        const { title, body } = payload.notification ?? {};
+        if (title) new Notification(title, { body, icon: '/logo.png' });
+      }) as unknown as () => void;
+    }
+  }, [authToken]);
+}
+.env.local — add these to your Next.js project:
+
+
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=
+Get all values from Firebase Console → Project Settings → General (your web app config) and the VAPID key from Cloud Messaging tab → Web Push certificates → Generate key pair.
+
+Usage in your layout/root component:
+
+
+useNotifications(authToken); // pass the JWT token from your auth state
+Update Todos
+
+Install firebase-admin package
+
+Add fcmToken column to User entity
+
+Add isUserConnected() to SocketGateway
+
+Create NotificationsModule and NotificationsService
+
+Add PATCH /users/fcm-token endpoint
+
+Hook NotificationsService into BookingService
+
+Hook NotificationsService into ChatService
+
+Register NotificationsModule in AppModule
+
+Provide Next.js frontend setup code
+Backend is fully done. Here's a summary of everything added:
+
+Backend files changed:
+
+user.entity.ts — fcmToken column added (auto-migrated in dev via synchronize: true)
+socket.gateway.ts — isUserConnected() method
+notifications.service.ts — new, wraps firebase-admin
+notifications.module.ts — new, @Global() so no per-module imports needed
+users.controller.ts — PATCH /users/fcm-token
+users.service.ts — updateFcmToken()
+booking.service.ts — push on new booking, accepted, cancelled, settled
+chat.service.ts — push on new message
+app.module.ts — NotificationsModule registered
+How it works: WebSocket handles real-time when the app is open. FCM fires only when the user is offline (checked via isUserConnected()). Once you drop firebase-service-account.json in the project root and set up the frontend, it's fully live.
+
+
+
+
+
+
+Firebase Push Notification Flow
+
+USER LOGS IN
+     │
+     ▼
+NotificationsProvider (layout.tsx)
+     │  reads token from useAuthStore
+     │
+     ▼
+useNotifications(token)          ← runs once when token appears
+     │
+     ├─ 1. requestNotificationPermission()
+     │        │
+     │        ├─ Notification.requestPermission()  ← browser popup "Allow notifications?"
+     │        │
+     │        ├─ navigator.serviceWorker.register('/firebase-messaging-sw.js?config=...')
+     │        │        └─ SW reads config from URL query param → initializeApp()
+     │        │
+     │        └─ getToken(messaging, { vapidKey })  ← Firebase gives FCM token
+     │
+     ├─ 2. api.patch('/users/fcm-token', { token: fcmToken })
+     │        └─ saves FCM token in backend DB (User.fcmToken column)
+     │
+     └─ 3. onMessage(messaging, handler)   ← listens for FOREGROUND messages
+When a booking/chat event happens on backend:
+
+Backend (BookingService / ChatService)
+     │
+     ├─ checks: isUserConnected() via SocketGateway
+     │
+     ├─ if ONLINE  → send via Socket.IO  (real-time, handled by useSocket.ts)
+     │
+     └─ if OFFLINE → send via FCM (firebase-admin → Google FCM servers)
+                          │
+                          ▼
+              ┌───────────────────────────┐
+              │      App OPEN?            │
+              └───────────────────────────┘
+                    │               │
+                   YES              NO
+                    │               │
+                    ▼               ▼
+            onMessage()     firebase-messaging-sw.js
+            in useNotifications    │
+                    │         onBackgroundMessage()
+                    ▼               │
+            addNotification()       ▼
+            → bell icon        OS native notification
+              shows it         (works even if browser
+                                is closed)
+The two paths summarized:
+Scenario	Channel	Handler	User sees
+App open, on the page	Socket.IO	useSocket.ts	toast + bell update
+App open, tab in background	FCM foreground	onMessage in useNotifications.ts	bell icon updates
+App closed / browser closed	FCM background	firebase-messaging-sw.js	OS push notification
+Key files and their single responsibility:
+src/lib/firebase.ts — initializes Firebase app, registers SW, gets FCM token
+public/firebase-messaging-sw.js — background notification display + click handler
+src/hooks/useNotifications.ts — ties it all together: permission → save token → listen foreground
+src/components/providers/NotificationsProvider.tsx — thin wrapper that calls the hook once in the tree
+src/stores/useNotificationStore.ts — persisted Zustand store, the bell reads from here
+
+
+
+https://console.firebase.google.com/project/hunarwala-69358

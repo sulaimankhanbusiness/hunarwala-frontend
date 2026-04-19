@@ -4,14 +4,22 @@ import React, { useState } from 'react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { useBookings } from '@/features/bookings/hooks/useBookings';
 import { BookingCard } from '@/features/bookings/components/BookingCard';
-import { Loader2, Briefcase, User as UserIcon, CalendarDays, Plus } from 'lucide-react';
+import { Loader2, Briefcase, User as UserIcon, CalendarDays, Plus, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
+import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
 
 export default function MyBookingsPage() {
     const { user, isAuthenticated } = useAuthStore();
     const [activeTab, setActiveTab] = useState<'client' | 'helper'>('client');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const clearBookings = useNavBadgeStore((s) => s.clearBookings);
 
     const { data: bookings = [], isLoading, refetch } = useBookings(activeTab);
+
+    // Clear booking badge as soon as the user opens this page
+    React.useEffect(() => {
+        clearBookings();
+    }, [clearBookings]);
 
     // Initial tab based on user type if possible
     React.useEffect(() => {
@@ -48,27 +56,48 @@ export default function MyBookingsPage() {
                     <p className="text-gray-500 font-medium">Manage your service requests and work schedule in one place.</p>
                 </div>
 
-                <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100 self-start">
-                    <button
-                        onClick={() => setActiveTab('client')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'client'
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
-                    >
-                        <UserIcon className="w-4 h-4" /> As Client
-                    </button>
-                    {user?.userType === 'helper' && (
+                <div className="flex items-center gap-3">
+                    {/* View toggle */}
+                    <div className="flex bg-white p-1 rounded-xl shadow-sm border border-gray-100">
                         <button
-                            onClick={() => setActiveTab('helper')}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'helper'
-                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                            onClick={() => setViewMode('grid')}
+                            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
+                            title="Grid view"
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
+                            title="List view"
+                        >
+                            <List className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Role tabs */}
+                    <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+                        <button
+                            onClick={() => setActiveTab('client')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'client'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
                                 : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                                 }`}
                         >
-                            <Briefcase className="w-4 h-4" /> As Helper
+                            <UserIcon className="w-4 h-4" /> As Client
                         </button>
-                    )}
+                        {user?.userType === 'helper' && (
+                            <button
+                                onClick={() => setActiveTab('helper')}
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'helper'
+                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <Briefcase className="w-4 h-4" /> As Helper
+                            </button>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -83,13 +112,14 @@ export default function MyBookingsPage() {
                     <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Loading bookings...</p>
                 </div>
             ) : filteredBookings.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <div className={`animate-in fade-in slide-in-from-bottom-5 duration-700 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'flex flex-col gap-4'}`}>
                     {filteredBookings.map((booking) => (
                         <BookingCard
                             key={booking.id}
                             booking={booking}
                             role={activeTab}
                             onUpdate={refetch}
+                            viewMode={viewMode}
                         />
                     ))}
                 </div>

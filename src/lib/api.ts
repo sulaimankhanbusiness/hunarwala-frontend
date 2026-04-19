@@ -1,7 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { toast } from 'sonner';
-import { da } from 'date-fns/locale';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
@@ -12,7 +11,6 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  console.log('token', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

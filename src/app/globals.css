@@ -50,6 +50,76 @@ body {
   min-height: 100vh;
 }
 
+/* ─── Page-level animations ──────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px)   scale(1); }
+  50%       { transform: translateY(-22px) scale(1.03); }
+}
+
+@keyframes floatYSlow {
+  0%, 100% { transform: translateY(0px)   scale(1); }
+  50%       { transform: translateY(-14px) scale(1.02); }
+}
+
+@keyframes blobMorph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; opacity: 0.18; }
+  33%       { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; opacity: 0.25; }
+  66%       { border-radius: 50% 60% 30% 60% / 30% 50% 60% 40%; opacity: 0.20; }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+  to   { width: 85%; }
+}
+
+@keyframes dotGridPulse {
+  0%, 100% { opacity: 0.08; }
+  50%       { opacity: 0.13; }
+}
+
+/* Hero entrance — applied once on load */
+.anim-hero-badge    { animation: fadeInDown 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+.anim-hero-title    { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.35s both; }
+.anim-hero-subtitle { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.52s both; }
+.anim-hero-ctas     { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.68s both; }
+.anim-hero-stats    { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.84s both; }
+
+/* Floating background elements */
+.anim-float         { animation: floatY     7s  ease-in-out infinite; }
+.anim-float-slow    { animation: floatYSlow 10s ease-in-out 3s infinite; }
+.anim-blob          { animation: blobMorph  8s  ease-in-out infinite; }
+.anim-blob-delayed  { animation: blobMorph  11s ease-in-out 4s infinite; }
+.anim-dot-grid      { animation: dotGridPulse 4s ease-in-out infinite; }
+
+/* Progress bar fill (triggered by class toggle) */
+.progress-bar-fill  { animation: progressFill 1.6s cubic-bezier(0.4,0,0.2,1) 0.3s both; }
+
+/* Scroll reveal — hidden by default, shown by JS */
+.sr-hidden  { opacity: 0; transform: translateY(32px); }
+.sr-visible { opacity: 1; transform: translateY(0);
+              transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1),
+                          transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+
+/* Icon pop on reveal */
+.icon-pop   { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.sr-visible .icon-pop { transform: scale(1.0); }
+.sr-hidden  .icon-pop { transform: scale(0.7); }
+
 @layer utilities {
   .glass {
     background: rgba(255, 255, 255, 0.7);

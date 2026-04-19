@@ -10,7 +10,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
 import { getHelperProfile } from '@/features/helpers/services/helpers.service';
-import type { HelperProfile } from '@/features/helpers/services/helpers.service';
+import type { HelperProfile } from '@/features/helpers/types/helpers.types';
 import { chatApi } from '@/features/chat/api/chat.api';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';

@@ -10,15 +10,13 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { Star, Navigation, Map as MapIcon, ExternalLink } from 'lucide-react';
 import { getMediaUrl } from '@/utils/url';
 
-// Fix for default marker icons in Leaflet with Next.js
-const DefaultIcon = L.icon({
+// Deferred to avoid window-access at module level during SSR
+const getDefaultIcon = () => L.icon({
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
 });
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface HelperMapProps {
     helpers: any[];
@@ -139,7 +137,7 @@ export default function HelperMap({ helpers = [], userLocation, center = { lat: 
 
                 {/* User Current Location Marker */}
                 {userLocation && (
-                    <Marker position={[userLocation.lat, userLocation.lng]} icon={DefaultIcon}>
+                    <Marker position={[userLocation.lat, userLocation.lng]} icon={getDefaultIcon()}>
                         <Popup>
                             <div className="font-bold text-blue-600">You are here</div>
                         </Popup>
@@ -161,7 +159,7 @@ export default function HelperMap({ helpers = [], userLocation, center = { lat: 
                             <Marker
                                 key={`${helper.id}-${lat}-${lng}`}
                                 position={[lat, lng]}
-                                icon={DefaultIcon}
+                                icon={getDefaultIcon()}
                             >
                                 <Popup minWidth={220}>
                                     <div className="p-2">

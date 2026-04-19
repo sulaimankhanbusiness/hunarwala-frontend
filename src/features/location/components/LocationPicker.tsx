@@ -9,8 +9,8 @@ import { getErrorMessage } from '@/utils/error';
 import { LocateFixed, MapPin, Layers } from 'lucide-react';
 import { getCurrentCoordinates } from '../services/location.service';
 
-// Fix for default marker icons
-const DefaultIcon = L.icon({
+// Leaflet accesses `window` when L.icon() is called — must be deferred to runtime
+const getDefaultIcon = () => L.icon({
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -33,7 +33,7 @@ function LocationMarker({ value, onChange }: { value: { lat: number; lng: number
     });
 
     return value === null ? null : (
-        <Marker position={value} icon={DefaultIcon} />
+        <Marker position={value} icon={getDefaultIcon()} />
     );
 }
 

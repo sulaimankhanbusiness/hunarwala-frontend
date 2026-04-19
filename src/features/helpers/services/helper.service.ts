@@ -1,18 +1,3 @@
-'use client';
-
-import api from '@/lib/api';
-
-export interface RegisterHelperDto {
-    headline: string;
-    bio?: string;
-    experienceYears: number;
-    ratePerHour: number;
-    cityId?: number;
-    latitude?: number;
-    longitude?: number;
-    categoryId: number;
-}
-
-export const registerAsHelper = async (dto: RegisterHelperDto) => {
-    return api.post('/users/register-helper', dto) as Promise<any>;
-};
+// Consolidated into helpers.service.ts — re-exporting for backwards compatibility.
+export { registerAsHelper } from './helpers.service';
+export type { RegisterHelperDto } from '../types/helpers.types';

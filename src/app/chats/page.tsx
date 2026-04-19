@@ -7,14 +7,21 @@ import { useChatById } from '@/features/chat/hooks/useChats';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
 
 function ChatsContent() {
     const [currentUserId, setCurrentUserId] = useState<string>('');
     const isMobileChatOpen = useChatStore((state) => state.isMobileChatOpen);
     const setActiveChat = useChatStore((state) => state.setActiveChat);
     const setMobileChatOpen = useChatStore((state) => state.setMobileChatOpen);
+    const clearMessages = useNavBadgeStore((s) => s.clearMessages);
     const searchParams = useSearchParams();
     const chatId = searchParams.get('chatId');
+
+    // Clear unread message badge as soon as the user opens this page
+    useEffect(() => {
+        clearMessages();
+    }, [clearMessages]);
 
     const { data: chatData } = useChatById(chatId);
 
