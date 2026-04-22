@@ -27,12 +27,17 @@ export default function Navbar() {
   const newBookings    = useNavBadgeStore((s) => s.newBookings);
 
   return (
-    <nav className="fixed w-full z-50 glass border-b border-gray-200">
+    <nav className="hidden md:block fixed w-full z-50 glass border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="text-2xl font-bold text-blue-600 tracking-tighter">
-              HunarWala<span className="text-amber-500">.</span>
+            <Link href="/" className="flex flex-col leading-none group">
+              <span className="text-2xl font-bold text-blue-600 tracking-tighter group-hover:text-blue-700 transition-colors">
+                HunarWala<span className="text-amber-500">.</span>
+              </span>
+              <span className="text-[11px] font-semibold text-gray-400 tracking-wide text-right" style={{ fontFamily: 'var(--font-urdu)', direction: 'rtl' }}>
+                ہنروالا
+              </span>
             </Link>
           </div>
 

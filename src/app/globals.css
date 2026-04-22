@@ -48,6 +48,14 @@ body {
   background: var(--background);
   color: var(--foreground);
   min-height: 100vh;
+  /* Prevent text size adjustment on mobile rotation */
+  -webkit-text-size-adjust: 100%;
+  /* Remove tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior: none;
 }
 
 /* ─── Page-level animations ──────────────────────────────────────────────── */

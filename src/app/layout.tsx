@@ -4,6 +4,8 @@ import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { ToasterProvider } from "@/components/providers/ToasterProvider";
 import Navbar from "@/components/layout/Navbar";
+import MobileHeader from "@/components/layout/MobileHeader";
+import BottomNav from "@/components/layout/BottomNav";
 import Footer from "@/components/layout/Footer";
 import { AuthRouteWatcher } from "@/components/providers/AuthRouteWatcher";
 import { SocketProvider } from "@/components/providers/SocketProvider";
@@ -53,13 +55,22 @@ export default function RootLayout({
           <AuthRouteWatcher>
             <SocketProvider>
               <NotificationsProvider>
-                <div className="flex flex-col min-h-screen">
-                  <Navbar />
-                  <main className="flex-grow pt-16">
-                    {children}
-                  </main>
+                {/* Desktop nav — hidden on mobile */}
+                <Navbar />
+                {/* Mobile header — hidden on desktop */}
+                <MobileHeader />
+
+                <main className="flex-grow pt-14 md:pt-16 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
+                  {children}
+                </main>
+
+                {/* Desktop footer — hidden on mobile */}
+                <div className="hidden md:block">
                   <Footer />
                 </div>
+
+                {/* Mobile bottom tab bar — hidden on desktop */}
+                <BottomNav />
               </NotificationsProvider>
             </SocketProvider>
           </AuthRouteWatcher>
