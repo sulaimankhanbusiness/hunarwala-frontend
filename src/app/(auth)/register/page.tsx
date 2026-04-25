@@ -10,8 +10,10 @@ import { useState, useEffect, Suspense } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, User, Briefcase, MapPin } from 'lucide-react';
 import ProfessionalInfo from '@/features/helpers/components/ProfessionalInfo';
 import ServiceLocationInfo from '@/features/helpers/components/ServiceLocationInfo';
+import DocumentsInfo from '@/features/helpers/components/DocumentsInfo';
+import { FileImage } from 'lucide-react';
 
-type Step = 'account' | 'professional' | 'location';
+type Step = 'account' | 'professional' | 'location' | 'documents';
 
 function RegisterForm() {
   const router = useRouter();
@@ -25,8 +27,9 @@ function RegisterForm() {
   const [userType, setUserType] = useState<'client' | 'helper'>('client');
 
   // Storage for multi-step data
-  const [accountData, setAccountData] = useState<any>(null);
+  const [accountData, setAccountData]       = useState<any>(null);
   const [professionalData, setProfessionalData] = useState<any>(null);
+  const [locationData, setLocationData]     = useState<any>(null);
 
   useEffect(() => {
     const type = searchParams.get('type');
@@ -64,25 +67,26 @@ function RegisterForm() {
     setStep('location');
   };
 
-  const onLocationSubmit = async (locationData: any) => {
+  const onLocationSubmit = (data: any) => {
+    setLocationData(data);
+    setStep('documents');
+  };
+
+  const onDocumentsSubmit = async (docsData: { profilePicture?: File; cnicFront?: File; cnicBack?: File }) => {
     setIsLoading(true);
     setError('');
     try {
-      // Step 1: Register the user account first
       const authRes = await registerApi(accountData);
-
-      // Step 2: Set authentication to get token for helper registration
       setAuth(authRes.user, authRes.accessToken);
 
-      // Step 3: Register as helper with professional and location data
       const finalHelperDto = {
         userId: authRes.user.id,
         ...professionalData,
-        ...locationData
+        ...locationData,
+        ...docsData,
       };
       await registerAsHelper(finalHelperDto);
 
-      // Registration complete!
       router.push('/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -91,10 +95,13 @@ function RegisterForm() {
     }
   };
 
+  const STEP_ORDER: Step[] = ['account', 'professional', 'location', 'documents'];
+
   const renderStepIcon = (s: Step, label: string, icon: any) => {
-    const isActive = step === s;
-    const isPast = (step === 'professional' && s === 'account') ||
-      (step === 'location' && (s === 'account' || s === 'professional'));
+    const currentIdx = STEP_ORDER.indexOf(step);
+    const thisIdx    = STEP_ORDER.indexOf(s);
+    const isActive   = step === s;
+    const isPast     = thisIdx < currentIdx;
 
     return (
       <div className="flex flex-col items-center gap-1 relative z-10">
@@ -118,12 +125,15 @@ function RegisterForm() {
         {userType === 'helper' && (
           <div className="mb-10 flex justify-between items-center max-w-sm mx-auto relative px-4">
             <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-100 -z-0 mx-8" />
-            <div className={`absolute top-4 left-0 h-0.5 bg-blue-500 transition-all duration-500 ease-in-out -z-0 mx-8 ${step === 'professional' ? 'w-1/2' : step === 'location' ? 'w-full' : 'w-0'
-              }`} />
-
-            {renderStepIcon('account', 'Account', <User size={16} />)}
-            {renderStepIcon('professional', 'Professional', <Briefcase size={16} />)}
-            {renderStepIcon('location', 'Location', <MapPin size={16} />)}
+            <div className={`absolute top-4 left-0 h-0.5 bg-blue-500 transition-all duration-500 ease-in-out -z-0 mx-8 ${
+              step === 'professional' ? 'w-1/3' :
+              step === 'location'     ? 'w-2/3' :
+              step === 'documents'    ? 'w-full' : 'w-0'
+            }`} />
+            {renderStepIcon('account',      'Account',  <User size={16} />)}
+            {renderStepIcon('professional', 'Pro',      <Briefcase size={16} />)}
+            {renderStepIcon('location',     'Location', <MapPin size={16} />)}
+            {renderStepIcon('documents',    'Docs',     <FileImage size={16} />)}
           </div>
         )}
 
@@ -256,8 +266,21 @@ function RegisterForm() {
           <ServiceLocationInfo
             onSubmit={onLocationSubmit}
             onBack={() => setStep('professional')}
-            isLoading={isLoading}
+            isLoading={false}
           />
+        )}
+
+        {step === 'documents' && (
+          <DocumentsInfo
+            onNext={onDocumentsSubmit}
+            onBack={() => setStep('location')}
+          />
+        )}
+
+        {isLoading && step === 'documents' && (
+          <div className="absolute inset-0 bg-white/80 rounded-3xl flex items-center justify-center z-10">
+            <Loader2 className="animate-spin text-blue-600" size={36} />
+          </div>
         )}
 
         <div className="mt-8 text-center text-sm text-gray-600">

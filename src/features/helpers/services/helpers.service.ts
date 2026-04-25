@@ -14,5 +14,20 @@ export const getTopRatedProfessionals = async (city: string, page = 1, limit = 1
 };
 
 export const registerAsHelper = async (dto: RegisterHelperDto) => {
-  return api.post('/users/register-helper', dto) as Promise<any>;
+  const { profilePicture, cnicFront, cnicBack, ...fields } = dto;
+
+  if (profilePicture || cnicFront || cnicBack) {
+    const form = new FormData();
+    Object.entries(fields).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) form.append(k, String(v));
+    });
+    if (profilePicture) form.append('profilePicture', profilePicture);
+    if (cnicFront)      form.append('cnicFront',      cnicFront);
+    if (cnicBack)       form.append('cnicBack',        cnicBack);
+    return api.post('/users/register-helper', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }) as Promise<any>;
+  }
+
+  return api.post('/users/register-helper', fields) as Promise<any>;
 };

@@ -40,6 +40,9 @@ export interface RegisterHelperDto {
   latitude?: number;
   longitude?: number;
   categoryId: number;
+  profilePicture?: File;
+  cnicFront?: File;
+  cnicBack?: File;
 }
 
 export interface HelperSearchParams {
