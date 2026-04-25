@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
@@ -71,6 +72,7 @@ export default function RootLayout({
 
                 {/* Mobile bottom tab bar — hidden on desktop */}
                 <BottomNav />
+                <Analytics />
               </NotificationsProvider>
             </SocketProvider>
           </AuthRouteWatcher>
