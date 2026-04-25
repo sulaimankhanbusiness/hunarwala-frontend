@@ -116,7 +116,7 @@ export function subscribeForeground(
 ): () => void {
   return onMessage(messaging, (payload) => {
     console.log('[FCM] Foreground message received:', payload);
-    const title = payload.notification?.title ?? 'HunarWala';
+    const title = payload.notification?.title ?? 'HunarWalaa';
     const body  = payload.notification?.body  ?? '';
     const data  = (payload.data ?? {}) as Record<string, string>;
     onPayload(title, body, data);

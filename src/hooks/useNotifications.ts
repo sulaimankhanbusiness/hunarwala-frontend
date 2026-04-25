@@ -83,7 +83,7 @@ export function useNotifications(token: string | null) {
       if (event.data?.type !== 'FCM_MESSAGE') return;
 
       const {
-        title = 'HunarWala',
+        title = 'HunarWalaa',
         body  = '',
         data  = {} as Record<string, string>,
       } = event.data as { type: string; title: string; body: string; data: Record<string, string> };

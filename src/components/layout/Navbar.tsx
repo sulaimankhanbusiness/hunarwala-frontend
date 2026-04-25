@@ -33,7 +33,7 @@ export default function Navbar() {
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex flex-col leading-none group">
               <span className="text-2xl font-bold text-blue-600 tracking-tighter group-hover:text-blue-700 transition-colors">
-                HunarWala<span className="text-amber-500">.</span>
+                HunarWalaa<span className="text-amber-500">.</span>
               </span>
               <span className="text-[11px] font-semibold text-gray-400 tracking-wide text-right" style={{ fontFamily: 'var(--font-urdu)', direction: 'rtl' }}>
                 ہنروالا

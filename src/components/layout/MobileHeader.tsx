@@ -58,7 +58,7 @@ export default function MobileHeader() {
             ) : (
               <Link href="/" className="flex flex-col leading-none">
                 <span className="text-lg font-black text-blue-600 tracking-tighter">
-                  HunarWala<span className="text-amber-500">.</span>
+                  HunarWalaa<span className="text-amber-500">.</span>
                 </span>
                 <span className="text-[9px] font-semibold text-gray-400 text-right" style={{ fontFamily: 'var(--font-urdu)', direction: 'rtl' }}>
                   ہنروالا
@@ -71,7 +71,7 @@ export default function MobileHeader() {
           <div className={`absolute inset-0 flex items-center transition-opacity duration-700 ease-in-out ${flipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <Link href="/" className="flex flex-col leading-none">
               <span className="text-lg font-black text-blue-600 tracking-tighter">
-                HunarWala<span className="text-amber-500">.</span>
+                HunarWalaa<span className="text-amber-500">.</span>
               </span>
               <span className="text-[9px] font-semibold text-gray-400 text-right" style={{ fontFamily: 'var(--font-urdu)', direction: 'rtl' }}>
                 ہنروالا

@@ -24,16 +24,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HunarWala - Find Expert Helpers",
-  description: "Connect with skilled professionals like Plumbers, Electricians, and more.",
+  title: "HunarWalaa - Find Expert Helpers",
+  description: "Connect with skilled professionals like Plumbers, Electricians, and more. Book verified helpers near you across Pakistan.",
+  keywords: [
+    "HunarWalaa",
+    "HunarWala",
+    "hunarwala",
+    "hunarwalaa",
+    "home services Pakistan",
+    "hire plumber Pakistan",
+    "electrician near me Pakistan",
+    "book helper online Pakistan",
+    "verified professionals Pakistan",
+    "service marketplace Pakistan",
+  ],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "HunarWala",
+    title: "HunarWalaa",
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    title: "HunarWalaa - Find Expert Helpers",
+    description: "Book verified plumbers, electricians, cleaners and more across Pakistan.",
+    url: "https://hunarwalaa.com",
+    siteName: "HunarWalaa",
+    locale: "en_PK",
+    type: "website",
   },
 };
 

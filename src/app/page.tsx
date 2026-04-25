@@ -1,7 +1,29 @@
+import type { Metadata } from 'next';
 import HelperSearch from '@/features/helpers/components/HelperSearch';
 import EarnSection from '@/features/helpers/components/EarnSection';
 import ScrollReveal from '@/components/ScrollReveal';
 import { ShieldCheck, CheckCircle2, Zap, Star, Users, MapPin, Briefcase } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'HunarWalaa — Find Expert Helpers in Pakistan',
+  description: 'Pakistan\'s #1 service marketplace. Book verified plumbers, electricians, cleaners and 20+ skilled professionals near you. Fast, safe, and affordable.',
+  keywords: [
+    'HunarWalaa', 'HunarWala', 'hunarwala', 'hunarwalaa',
+    'home services Pakistan', 'hire plumber Pakistan',
+    'electrician near me Pakistan', 'book helper Pakistan',
+    'verified professionals Pakistan', 'service marketplace Pakistan',
+    'ہنروالا',
+  ],
+  openGraph: {
+    title: 'HunarWalaa — Find Expert Helpers in Pakistan',
+    description: 'Book verified plumbers, electricians, cleaners and more across Pakistan.',
+    url: 'https://hunarwalaa.com',
+    siteName: 'HunarWalaa',
+    locale: 'en_PK',
+    type: 'website',
+  },
+  alternates: { canonical: 'https://hunarwalaa.com' },
+};
 
 const HERO_STATS = [
   { icon: Briefcase, value: '8,500+', label: 'Bookings Completed' },
@@ -114,7 +136,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <ScrollReveal className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose HunarWala?</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose HunarWalaa</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               We don't just find you help; we ensure peace of mind with our rigorous vetting and safety standards.
             </p>

@@ -204,7 +204,7 @@ export default function BottomNav() {
                 iconBg="bg-blue-100" label="Join Free" sub="Create a free account"
                 icon={<UserPlus size={18} className="text-blue-600" />} />
               <DrawerItem onClick={() => go('/register?type=helper')}
-                iconBg="bg-emerald-100" label="Become a Pro" sub="Start earning on HunarWala"
+                iconBg="bg-emerald-100" label="Become a Pro" sub="Start earning on HunarWalaa"
                 icon={<Shield size={18} className="text-emerald-600" />} />
             </>
           )}

@@ -136,7 +136,7 @@ function RegisterForm() {
         {step === 'account' && (
           <>
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Join HunarWala</h1>
+              <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Join HunarWalaa</h1>
               <p className="text-gray-500 font-medium">Your platform to find and provide expert services</p>
             </div>
 

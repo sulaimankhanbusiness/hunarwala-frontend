@@ -88,7 +88,7 @@ export function FcmToast({ id, title, body, type, link }: FcmToastProps) {
 
         {/* Footer */}
         <div className="flex items-center gap-1 mt-1.5">
-          <span className="text-[10px] font-bold text-blue-600 tracking-tight">HunarWala</span>
+          <span className="text-[10px] font-bold text-blue-600 tracking-tight">HunarWalaa</span>
           <span className="text-[10px] text-amber-500 font-bold">.</span>
           {link && (
             <span className="text-[10px] text-gray-400 ml-1">Tap to open →</span>

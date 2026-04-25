@@ -85,7 +85,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                         </div>
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-500 font-medium">Account Title</span>
-                            <span className="text-gray-900 font-bold">HunarWala Pakistan</span>
+                            <span className="text-gray-900 font-bold">HunarWalaa Pakistan</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-500 font-medium">Account Number</span>

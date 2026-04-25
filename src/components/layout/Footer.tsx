@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="text-2xl font-bold text-blue-600 tracking-tighter mb-4 block">
-              HunarWala<span className="text-amber-500">.</span>
+              HunarWalaa<span className="text-amber-500">.</span>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
               Connecting skilled professionals with people who need them. Trusted, verified, and reliable services at your doorstep.
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-400">© 2025 HunarWala. All rights reserved.</p>
+          <p className="text-sm text-gray-400">© 2025 HunarWalaa. All rights reserved.</p>
           <div className="flex space-x-6 text-sm text-gray-500">
             <Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-gray-900">Terms of Service</Link>

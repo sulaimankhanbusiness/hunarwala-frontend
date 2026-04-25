@@ -548,7 +548,7 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'grid' }: Book
                                     ? booking.helper?.user?.fullName
                                     : booking.user?.fullName;
                                 const waNumber = phone?.replace(/\D/g, '').replace(/^0/, '92');
-                                const waMsg = encodeURIComponent(`Hi ${name}, regarding my HunarWala booking — ${booking.serviceDescription}`);
+                                const waMsg = encodeURIComponent(`Hi ${name}, regarding my HunarWalaa booking — ${booking.serviceDescription}`);
                                 return (
                                     <div className="w-full flex gap-2">
                                         <a

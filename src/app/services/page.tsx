@@ -12,7 +12,7 @@ import {
 // ─── SEO Metadata ─────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-  title: 'Home Services in Pakistan | HunarWala – Verified Professionals',
+  title: 'Home Services in Pakistan | HunarWalaa – Verified Professionals',
   description:
     'Book trusted plumbers, electricians, cleaners, carpenters, AC technicians & 20+ skilled professionals across Pakistan. Verified, affordable & available today.',
   keywords: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     'house cleaning service',
     'AC repair Karachi Lahore',
     'handyman Pakistan',
-    'HunarWala services',
+    'HunarWalaa services',
     'book professional Pakistan',
     'home maintenance Pakistan',
   ],
@@ -32,22 +32,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: 'https://hunarwala.com/services',
-    title: 'Home Services in Pakistan | HunarWala',
+    title: 'Home Services in Pakistan | HunarWalaa',
     description:
       'Book verified plumbers, electricians, cleaners & 20+ skilled professionals across Pakistan. Transparent pricing. Same-day availability.',
-    siteName: 'HunarWala',
+    siteName: 'HunarWalaa',
     images: [
       {
         url: 'https://hunarwala.com/og-services.png',
         width: 1200,
         height: 630,
-        alt: 'HunarWala – Hire skilled home-service professionals across Pakistan',
+        alt: 'HunarWalaa – Hire skilled home-service professionals across Pakistan',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Home Services in Pakistan | HunarWala',
+    title: 'Home Services in Pakistan | HunarWalaa',
     description:
       'Book trusted plumbers, electricians, cleaners & more across Pakistan. Verified pros, transparent prices.',
     images: ['https://hunarwala.com/og-services.png'],
@@ -68,7 +68,7 @@ const jsonLd = {
       '@type': 'WebPage',
       '@id': 'https://hunarwala.com/services',
       url: 'https://hunarwala.com/services',
-      name: 'Home Services in Pakistan | HunarWala',
+      name: 'Home Services in Pakistan | HunarWalaa',
       description:
         'Book verified plumbers, electricians, cleaners, carpenters, AC technicians & 20+ skilled professionals across Pakistan.',
       inLanguage: 'en-PK',
@@ -84,7 +84,7 @@ const jsonLd = {
     {
       '@type': 'Organization',
       '@id': 'https://hunarwala.com/#organization',
-      name: 'HunarWala',
+      name: 'HunarWalaa',
       url: 'https://hunarwala.com',
       description: "Pakistan's trusted marketplace for home services and skilled professionals.",
       areaServed: { '@type': 'Country', name: 'Pakistan' },
@@ -215,7 +215,7 @@ const TRUST_ITEMS = [
   {
     icon: ShieldCheck,
     title: 'Verified Professionals',
-    body: 'Every pro on HunarWala goes through identity checks, skill assessments, and community reviews before being listed.',
+    body: 'Every pro on HunarWalaa goes through identity checks, skill assessments, and community reviews before being listed.',
   },
   {
     icon: CheckCircle2,
@@ -434,7 +434,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ── Why HunarWala ─────────────────────────────────────────────── */}
+      {/* ── Why HunarWalaa─────────────────────────────────────────────── */}
       <section className="bg-gray-50 py-24 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -491,7 +491,7 @@ export default function ServicesPage() {
             </h2>
 
             <p className="text-gray-500 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
-              Join thousands of households across Pakistan who trust HunarWala for reliable, affordable home services.
+              Join thousands of households across Pakistan who trust HunarWalaa for reliable, affordable home services.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

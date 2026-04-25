@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-500">Sign in to continue to HunarWala</p>
+          <p className="text-gray-500">Sign in to continue to HunarWalaa</p>
         </div>
 
         {error && (

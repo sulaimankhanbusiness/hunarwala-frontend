@@ -466,7 +466,7 @@ export default function HowItWorksPage() {
             Simple Process
           </span>
           <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-5 tracking-tight">
-            How <span className="text-blue-600">HunarWala</span> Works
+            How <span className="text-blue-600">HunarWalaa</span> Works
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto font-medium leading-relaxed mb-10">
             Connecting Pakistan's finest talent with those who need it most —
@@ -616,7 +616,7 @@ export default function HowItWorksPage() {
             <div className="inline-flex flex-col sm:flex-row items-center gap-5 bg-white border border-gray-200 rounded-2xl px-8 py-5 shadow-sm">
               <div className="text-left">
                 <p className="font-bold text-gray-900 text-sm">Start earning with your skills today</p>
-                <p className="text-gray-400 text-xs mt-0.5">Join 1,200+ verified pros on HunarWala.</p>
+                <p className="text-gray-400 text-xs mt-0.5">Join 1,200+ verified pros on HunarWalaa</p>
               </div>
               <Link href="/register?type=helper" className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-indigo-200 hover:-translate-y-0.5 flex items-center gap-1.5 whitespace-nowrap">
                 Register as Pro
