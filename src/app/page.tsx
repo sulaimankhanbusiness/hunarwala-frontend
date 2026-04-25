@@ -5,7 +5,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 import { ShieldCheck, CheckCircle2, Zap, Star, Users, MapPin, Briefcase } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'HunarWalaa — Find Expert Helpers in Pakistan',
+  title: 'HunarWalaa — Find Skilled Professionals',
   description: 'Pakistan\'s #1 service marketplace. Book verified plumbers, electricians, cleaners and 20+ skilled professionals near you. Fast, safe, and affordable.',
   keywords: [
     'HunarWalaa', 'HunarWala', 'hunarwala', 'hunarwalaa',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     'ہنروالا',
   ],
   openGraph: {
-    title: 'HunarWalaa — Find Expert Helpers in Pakistan',
+    title: 'HunarWalaa — Find Skilled Professionals',
     description: 'Book verified plumbers, electricians, cleaners and more across Pakistan.',
     url: 'https://hunarwalaa.com',
     siteName: 'HunarWalaa',

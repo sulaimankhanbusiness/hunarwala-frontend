@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HunarWalaa - Find Expert Helpers",
+  title: "HunarWalaa — Find Skilled Professionals",
   description: "Connect with skilled professionals like Plumbers, Electricians, and more. Book verified helpers near you across Pakistan.",
   keywords: [
     "HunarWalaa",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "HunarWalaa - Find Expert Helpers",
+    title: "HunarWalaa — Find Skilled Professionals",
     description: "Book verified plumbers, electricians, cleaners and more across Pakistan.",
     url: "https://hunarwalaa.com",
     siteName: "HunarWalaa",
