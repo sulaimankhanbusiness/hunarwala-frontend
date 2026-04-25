@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Home, Search, Briefcase, MessageSquare, Wallet,
   MoreHorizontal, X, Info, LogOut, LogIn, UserPlus,
-  ChevronRight, Star, Shield,
+  ChevronRight, Star, Shield, Headphones,
 } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
@@ -194,6 +194,10 @@ export default function BottomNav() {
             iconBg="bg-amber-100" label="Top Rated Pros" sub="Highest rated professionals"
             icon={<Star size={18} className="text-amber-500" />} />
 
+          <DrawerItem onClick={() => go('/contact')}
+            iconBg="bg-sky-100" label="Support" sub="Get help from our team"
+            icon={<Headphones size={18} className="text-sky-600" />} />
+
           {!user && (
             <>
               <div className="h-px bg-gray-100 mx-4 my-1" />
@@ -221,7 +225,7 @@ export default function BottomNav() {
 
         {/* App version footer */}
         <p className="text-center text-[10px] text-gray-300 font-semibold mt-4 pb-1 tracking-wide">
-          HUNARWALA · PAKISTAN
+          HUNARWALAA · PAKISTAN
         </p>
       </div>
     </>

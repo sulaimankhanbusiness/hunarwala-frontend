@@ -12,6 +12,7 @@ import Footer from "@/components/layout/Footer";
 import { AuthRouteWatcher } from "@/components/providers/AuthRouteWatcher";
 import { SocketProvider } from "@/components/providers/SocketProvider";
 import { NotificationsProvider } from "@/components/providers/NotificationsProvider";
+import SupportButton from "@/components/SupportButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -90,6 +91,9 @@ export default function RootLayout({
                 <div className="hidden md:block">
                   <Footer />
                 </div>
+
+                {/* Floating support button — desktop only */}
+                <SupportButton />
 
                 {/* Mobile bottom tab bar — hidden on desktop */}
                 <BottomNav />
