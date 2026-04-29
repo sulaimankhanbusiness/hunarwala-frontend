@@ -159,9 +159,11 @@ const jsonLd = {
       "telephone": "+92-323-019-6061",
       "address": {
         "@type": "PostalAddress",
-        "addressCountry": "PK",
-        "addressRegion": "Islamabad Capital Territory",
+        "streetAddress": "Blue Area",
         "addressLocality": "Islamabad",
+        "addressRegion": "Islamabad Capital Territory",
+        "postalCode": "44000",
+        "addressCountry": "PK",
       },
       "areaServed": [
         { "@type": "City", "name": "Lahore" },
@@ -179,7 +181,7 @@ const jsonLd = {
         "Painting", "Tutoring", "Pest Control", "Solar Installation",
         "Home Repair", "Appliance Repair", "Deep Cleaning",
       ],
-      "priceRange": "₨₨",
+      "priceRange": "Rs-RsRs",
       "currenciesAccepted": "PKR",
       "paymentAccepted": "Cash",
     },
