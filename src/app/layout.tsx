@@ -24,38 +24,158 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "HunarWalaa — Find Skilled Professionals",
-  description: "Connect with skilled professionals like Plumbers, Electricians, and more. Book verified helpers near you across Pakistan.",
-  keywords: [
-    "HunarWalaa",
-    "HunarWala",
-    "hunarwala",
-    "hunarwalaa",
+const BRAND_KEYWORDS = [
+  "HunarWalaa", "HunarWala", "Hunar Walaa", "Hunar Wala",
+  "hunarwalaa", "hunarwala", "hunar walaa", "hunar wala", "hunar", "ہنروالا",
+];
+
+const STATIC_FALLBACK_KEYWORDS = [
+  "Plumbing", "Electrical", "Cleaning", "Carpentry", "Tutoring",
+  "Painting", "Home Repair", "AC Repair & Servicing", "Deep Cleaning",
+  "Appliance Repair", "Pest Control", "Solar Installation",
+];
+
+const NEAR_ME_SUFFIXES = ["near me", "near me Pakistan", "in Pakistan", "in Lahore", "in Karachi", "in Islamabad"];
+const HIRE_PREFIXES = ["hire", "book", "find"];
+
+function buildCategoryKeywords(categoryNames: string[]): string[] {
+  const keywords: string[] = [];
+  for (const name of categoryNames) {
+    keywords.push(name);
+    for (const suffix of NEAR_ME_SUFFIXES) keywords.push(`${name} ${suffix}`);
+    for (const prefix of HIRE_PREFIXES) keywords.push(`${prefix} ${name.toLowerCase()}`);
+  }
+  return keywords;
+}
+
+async function fetchCategories(): Promise<string[]> {
+  try {
+    const res = await fetch('https://api.hunarwalaa.com/skills/categories', {
+      next: { revalidate: 3600 }, // re-fetch every 1 hour
+    });
+    if (!res.ok) return STATIC_FALLBACK_KEYWORDS;
+    const json = await res.json();
+    return (json.data as { name: string }[]).map((c) => c.name);
+  } catch {
+    return STATIC_FALLBACK_KEYWORDS;
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const categoryNames = await fetchCategories();
+  const categoryKeywords = buildCategoryKeywords(categoryNames);
+
+  const allKeywords = [
+    ...BRAND_KEYWORDS,
+    ...categoryKeywords,
     "home services Pakistan",
-    "hire plumber Pakistan",
-    "electrician near me Pakistan",
-    "book helper online Pakistan",
-    "verified professionals Pakistan",
-    "service marketplace Pakistan",
+    "service provider near me",
+    "skilled professionals Pakistan",
+    "verified workers Pakistan",
+    "online booking Pakistan",
+    "skill marketplace Pakistan",
+    "Pakistan home services app",
+  ];
+
+  return {
+    title: "HunarWalaa — Find Skilled Professionals in Pakistan",
+    description: "HunarWalaa (HunarWala) — Pakistan's #1 skill marketplace. Book verified plumbers, electricians, cleaners, mechanics and 20+ skilled professionals near you. Fast, safe and affordable home services across Pakistan.",
+    keywords: allKeywords,
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "HunarWalaa",
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    openGraph: {
+      title: "HunarWalaa — Find Skilled Professionals in Pakistan",
+      description: "Pakistan's #1 skill marketplace. Book verified plumbers, electricians, cleaners and 20+ professionals near you. Fast, safe and affordable.",
+      url: "https://hunarwalaa.com",
+      siteName: "HunarWalaa",
+      locale: "en_PK",
+      type: "website",
+    },
+    alternates: {
+      canonical: "https://hunarwalaa.com",
+    },
+  };
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://hunarwalaa.com/#organization",
+      "name": "HunarWalaa",
+      "alternateName": ["HunarWala", "Hunar Walaa", "Hunar Wala"],
+      "url": "https://hunarwalaa.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://hunarwalaa.com/logo.png",
+      },
+      "description": "Pakistan's #1 skill marketplace connecting clients with verified local professionals.",
+      "areaServed": {
+        "@type": "Country",
+        "name": "Pakistan",
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "url": "https://hunarwalaa.com/contact",
+        "availableLanguage": ["English", "Urdu"],
+      },
+      "sameAs": [
+        "https://www.facebook.com/hunarwalaa",
+        "https://www.instagram.com/hunarwalaa",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://hunarwalaa.com/#website",
+      "url": "https://hunarwalaa.com",
+      "name": "HunarWalaa",
+      "publisher": { "@id": "https://hunarwalaa.com/#organization" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://hunarwalaa.com/services?skill={search_term_string}",
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://hunarwalaa.com/#localbusiness",
+      "name": "HunarWalaa",
+      "description": "Book verified plumbers, electricians, cleaners and 20+ skilled professionals near you across Pakistan.",
+      "url": "https://hunarwalaa.com",
+      "logo": "https://hunarwalaa.com/logo.png",
+      "areaServed": [
+        { "@type": "City", "name": "Lahore" },
+        { "@type": "City", "name": "Karachi" },
+        { "@type": "City", "name": "Islamabad" },
+        { "@type": "City", "name": "Rawalpindi" },
+        { "@type": "City", "name": "Faisalabad" },
+        { "@type": "City", "name": "Peshawar" },
+        { "@type": "City", "name": "Multan" },
+        { "@type": "City", "name": "Quetta" },
+        { "@type": "City", "name": "Mardan" },
+      ],
+      "serviceType": [
+        "Plumbing", "Electrical", "AC Repair", "Cleaning", "Carpentry",
+        "Painting", "Tutoring", "Pest Control", "Solar Installation",
+        "Home Repair", "Appliance Repair", "Deep Cleaning",
+      ],
+      "priceRange": "₨₨",
+      "currenciesAccepted": "PKR",
+      "paymentAccepted": "Cash",
+    },
   ],
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "HunarWalaa",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  openGraph: {
-    title: "HunarWalaa — Find Skilled Professionals",
-    description: "Book verified plumbers, electricians, cleaners and more across Pakistan.",
-    url: "https://hunarwalaa.com",
-    siteName: "HunarWalaa",
-    locale: "en_PK",
-    type: "website",
-  },
 };
 
 export default function RootLayout({
@@ -69,6 +189,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#2563eb" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/logo.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
