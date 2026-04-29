@@ -155,6 +155,14 @@ const jsonLd = {
       "description": "Book verified plumbers, electricians, cleaners and 20+ skilled professionals near you across Pakistan.",
       "url": "https://hunarwalaa.com",
       "logo": "https://hunarwalaa.com/logo.png",
+      "image": "https://hunarwalaa.com/logo.png",
+      "telephone": "+92-323-019-6061",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "PK",
+        "addressRegion": "Islamabad Capital Territory",
+        "addressLocality": "Islamabad",
+      },
       "areaServed": [
         { "@type": "City", "name": "Lahore" },
         { "@type": "City", "name": "Karachi" },
