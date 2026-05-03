@@ -16,7 +16,8 @@ import LocationPermissionsModal from '@/features/location/components/LocationPer
 import { getMediaUrl } from '@/utils/url';
 import { BookingForm } from '@/features/bookings/components/BookingForm';
 import { SimpleModal } from '@/components/SimpleModal';
-
+import { useAuthStore } from '@/features/auth/stores/useAuthStore';
+import { useRouter } from 'next/navigation';
 const HelperMap = dynamic(() => import('./HelperMap'), {
   ssr: false,
   loading: () => <div className="h-[400px] w-full bg-gray-100 animate-pulse rounded-2xl" />,
@@ -37,7 +38,7 @@ export default function HelperSearch() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [singleBookingHelper, setSingleBookingHelper] = useState<{ id: string; name: string } | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('rating');
-
+  const router = useRouter();
   const [searchParams, setSearchParams] = useState<{
     skill?: string;
     country?: string;
@@ -102,6 +103,15 @@ export default function HelperSearch() {
 
     detectInitialCity();
   }, []);
+
+  const { isAuthenticated } = useAuthStore();
+  const handleBookNow = ({ id, name }: { id: string; name: string }) => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    setSingleBookingHelper({ id, name });
+  };
 
   const handleSearch = (manualLoc?: typeof location) => {
     const params: Record<string, any> = {};
@@ -431,7 +441,7 @@ export default function HelperSearch() {
                       View Profile
                     </Link>
                     <button
-                      onClick={() => setSingleBookingHelper({ id: helper.id, name: helper.fullName })}
+                      onClick={() => handleBookNow({ id: helper.id, name: helper.fullName })}
                       className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm flex items-center justify-center gap-1.5 shadow-sm shadow-blue-200"
                     >
                       <CalendarCheck size={15} />
