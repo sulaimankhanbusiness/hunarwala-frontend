@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { socketService } from '@/lib/socket';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,7 +11,6 @@ import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
 export const useSocket = () => {
     const { token, isAuthenticated, user } = useAuthStore();
     const queryClient = useQueryClient();
-    const isFirstRun = useRef(true);
 
     useEffect(() => {
         if (isAuthenticated && token) {
@@ -36,12 +35,13 @@ export const useSocket = () => {
                     const allMessages = oldData.pages.flatMap((p: any) => p.items);
                     if (allMessages.find((m: any) => m.id === message.id)) return oldData;
 
+                    // Pages are stored newest-first; MessageList reverses the flat array
+                    // for display. Prepend to page 0 so the message lands at the bottom.
                     const newPages = [...oldData.pages];
-                    const lastPageIdx = newPages.length - 1;
-                    newPages[lastPageIdx] = {
-                        ...newPages[lastPageIdx],
-                        items: [...newPages[lastPageIdx].items, message],
-                        total: (newPages[lastPageIdx].total || 0) + 1
+                    newPages[0] = {
+                        ...newPages[0],
+                        items: [message, ...newPages[0].items],
+                        total: (newPages[0].total || 0) + 1
                     };
                     return { ...oldData, pages: newPages };
                 });
