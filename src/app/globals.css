@@ -7,12 +7,12 @@
   --foreground: #1F2937;
   /* Dark Gray Text */
 
-  --primary: #2563EB;
-  /* Royal Blue */
+  --primary: #4F46E5;
+  /* Indigo-600 — premium, distinctive, trustworthy */
   --primary-foreground: #FFFFFF;
 
   --secondary: #F59E0B;
-  /* Amber */
+  /* Amber — energy, earn, CTA */
   --secondary-foreground: #FFFFFF;
 
   --muted: #F3F4F6;
@@ -100,12 +100,24 @@ body {
   50%       { opacity: 0.13; }
 }
 
+/* Worker image slideshow */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes slideOutLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+.worker-slide-in  { animation: slideInRight 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+.worker-slide-out { animation: slideOutLeft 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+
 /* Hero entrance — applied once on load */
-.anim-hero-badge    { animation: fadeInDown 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
-.anim-hero-title    { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.35s both; }
-.anim-hero-subtitle { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.52s both; }
-.anim-hero-ctas     { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.68s both; }
-.anim-hero-stats    { animation: fadeInUp   0.65s cubic-bezier(0.22,1,0.36,1) 0.84s both; }
+.anim-hero-badge    { animation: fadeInDown  0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+.anim-hero-title    { animation: fadeInUp    0.65s cubic-bezier(0.22,1,0.36,1) 0.35s both; }
+.anim-hero-subtitle { animation: fadeInUp    0.65s cubic-bezier(0.22,1,0.36,1) 0.52s both; }
+.anim-hero-ctas     { animation: fadeInUp    0.65s cubic-bezier(0.22,1,0.36,1) 0.68s both; }
+.anim-hero-stats    { animation: fadeInUp    0.65s cubic-bezier(0.22,1,0.36,1) 0.84s both; }
 
 /* Floating background elements */
 .anim-float         { animation: floatY     7s  ease-in-out infinite; }
