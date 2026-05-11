@@ -79,6 +79,7 @@ export const useSocket = () => {
 
                 // Increment nav badge for messages not sent by the current user
                 if (message.senderUserId !== user?.id) {
+                    console.log('New message from', message);
                     useNavBadgeStore.getState().incrementMessages();
                     toast.info(`New message from ${message.sender?.fullName || 'Someone'}`);
                 }
