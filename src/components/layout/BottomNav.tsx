@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Home, Search, Briefcase, MessageSquare, Wallet,
   MoreHorizontal, X, Info, LogOut, LogIn, UserPlus,
-  ChevronRight, Star, Shield, Headphones,
+  ChevronRight, Star, Shield, Headphones, UserCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
@@ -216,6 +216,11 @@ export default function BottomNav() {
           {user && (
             <>
               <div className="h-px bg-gray-100 mx-4 my-1" />
+              {isHelper && (
+                <DrawerItem onClick={() => go('/profile')}
+                  iconBg="bg-indigo-100" label="My Profile" sub="View your public profile"
+                  icon={<UserCircle size={18} className="text-indigo-600" />} />
+              )}
               <DrawerItem onClick={handleLogout} danger
                 iconBg="bg-red-100" label="Logout" sub="Sign out of your account"
                 icon={<LogOut size={18} className="text-red-500" />} />

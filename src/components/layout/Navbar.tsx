@@ -72,7 +72,21 @@ export default function Navbar() {
                     <span className="text-xs font-bold text-indigo-700">{wallet.balance.toLocaleString()} PKR</span>
                   </Link>
                 )}
-                <span className="text-sm font-medium text-gray-700">Hi, {user.fullName.split(' ')[0]}</span>
+                {user.userType === 'helper' ? (
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all group"
+                  >
+                    <span className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
+                      {user.fullName[0].toUpperCase()}
+                    </span>
+                    <span className="text-sm font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors">
+                      {user.fullName.split(' ')[0]}
+                    </span>
+                  </Link>
+                ) : (
+                  <span className="text-sm font-medium text-gray-700">Hi, {user.fullName.split(' ')[0]}</span>
+                )}
                 <button onClick={logout} className="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm">
                   Logout
                 </button>

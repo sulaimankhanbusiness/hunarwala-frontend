@@ -48,13 +48,13 @@ export default function MobileHeader() {
           {/* Greeting */}
           <div className={`absolute inset-0 flex items-center transition-opacity duration-700 ease-in-out ${flipped ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             {user ? (
-              <div className="flex items-center gap-2.5 min-w-0">
+              <Link href={user.userType === 'helper' ? '/profile' : '/'} className="flex items-center gap-2.5 min-w-0">
                 <Avatar name={user.fullName} />
                 <div className="min-w-0">
                   <p className="text-[11px] text-gray-400 leading-none mb-0.5">{greeting}</p>
                   <p className="text-sm font-bold text-gray-900 leading-none truncate">{firstName} 👋</p>
                 </div>
-              </div>
+              </Link>
             ) : (
               <Link href="/" className="flex flex-col leading-none">
                 <span className="text-lg font-black text-blue-600 tracking-tighter">

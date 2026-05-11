@@ -59,7 +59,8 @@ export interface Booking {
     };
     helper?: {
         id: string;
-        userId: string;
+        userId?: string;
+        headline?: string;
         user: {
             fullName: string;
             profileImage?: string;

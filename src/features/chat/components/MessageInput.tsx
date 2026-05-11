@@ -3,19 +3,23 @@ import { useChatStore } from '../store/chatStore';
 import { Send, X, Paperclip, MapPin, Loader2 } from 'lucide-react';
 import { EmojiPicker } from './EmojiPicker';
 import { getCurrentCoordinates, reverseGeocode } from '@/features/location/services/location.service';
+import { socketService } from '@/lib/socket';
 import { toast } from 'sonner';
 import clsx from 'clsx';
 
 interface MessageInputProps {
+    chatId: string;
     onSend: (content: string, replyToId?: string, contentType?: 'text' | 'location', metadata?: any) => void;
     onEdit?: (messageId: string, content: string) => void;
     disabled?: boolean;
 }
 
-export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) => {
+export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputProps) => {
     const [message, setMessage] = useState('');
     const [isLocating, setIsLocating] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isTypingRef = useRef(false);
 
     const replyingTo = useChatStore((state) => state.replyingTo);
     const editingMessage = useChatStore((state) => state.editingMessage);
@@ -25,7 +29,7 @@ export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) =>
     // Set message content when editing
     useEffect(() => {
         if (editingMessage) {
-            setMessage(editingMessage.content);
+            setMessage(editingMessage.content ?? '');
             textareaRef.current?.focus();
         }
     }, [editingMessage]);
@@ -38,9 +42,32 @@ export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) =>
         }
     }, [message]);
 
+    const stopTyping = () => {
+        if (isTypingRef.current) {
+            isTypingRef.current = false;
+            socketService.emit('typing:stop', { chatId });
+        }
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+            typingTimeoutRef.current = null;
+        }
+    };
+
+    const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setMessage(e.target.value);
+        if (!isTypingRef.current) {
+            isTypingRef.current = true;
+            socketService.emit('typing:start', { chatId });
+        }
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(stopTyping, 2500);
+    };
+
     const handleSend = () => {
         const trimmedMessage = message.trim();
         if (!trimmedMessage || disabled) return;
+
+        stopTyping();
 
         if (editingMessage && onEdit) {
             onEdit(editingMessage.id, trimmedMessage);
@@ -164,7 +191,7 @@ export const MessageInput = ({ onSend, onEdit, disabled }: MessageInputProps) =>
                     <textarea
                         ref={textareaRef}
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={handleMessageChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Type a message..."
                         disabled={disabled}

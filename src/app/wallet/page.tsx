@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function WalletPage() {
     return (
-        <main className="bg-gray-50 min-h-screen py-12">
+        <main className="bg-gray-50 min-h-screen py-6 md:py-10">
             <WalletDashboard />
         </main>
     );

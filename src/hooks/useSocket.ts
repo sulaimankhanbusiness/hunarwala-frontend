@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { chatApi } from '@/features/chat/api/chat.api';
 import { useNavBadgeStore } from '@/stores/useNavBadgeStore';
+import { useChatStore } from '@/features/chat/store/chatStore';
 
 export const useSocket = () => {
     const { token, isAuthenticated, user } = useAuthStore();
@@ -188,6 +189,53 @@ export const useSocket = () => {
                 });
             };
 
+            // ── Presence events ───────────────────────────────────────────────
+            const handleUserOnline = ({ userId }: { userId: string }) => {
+                useChatStore.getState().updateActiveChatOnlineStatus(userId, true);
+                // Also update any cached chat list items for this user
+                queryClient.setQueryData(['chats'], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page: any) => ({
+                            ...page,
+                            items: page.items.map((c: any) =>
+                                c.otherParticipant?.id === userId
+                                    ? { ...c, otherParticipant: { ...c.otherParticipant, isOnline: true } }
+                                    : c
+                            ),
+                        })),
+                    };
+                });
+            };
+
+            const handleUserOffline = ({ userId }: { userId: string }) => {
+                useChatStore.getState().updateActiveChatOnlineStatus(userId, false);
+                queryClient.setQueryData(['chats'], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page: any) => ({
+                            ...page,
+                            items: page.items.map((c: any) =>
+                                c.otherParticipant?.id === userId
+                                    ? { ...c, otherParticipant: { ...c.otherParticipant, isOnline: false } }
+                                    : c
+                            ),
+                        })),
+                    };
+                });
+            };
+
+            // ── Typing events ─────────────────────────────────────────────────
+            const handleTypingStart = ({ chatId }: { chatId: string }) => {
+                useChatStore.getState().setTyping(chatId, true);
+            };
+
+            const handleTypingStop = ({ chatId }: { chatId: string }) => {
+                useChatStore.getState().setTyping(chatId, false);
+            };
+
             // ── Booking events ────────────────────────────────────────────────
             const handleBookingUpdated = (data: any) => {
                 console.log('[Socket] Booking updated:', data);
@@ -225,6 +273,10 @@ export const useSocket = () => {
             socketService.on('message_edited', handleMessageEdited);
             socketService.on('booking_updated', handleBookingUpdated);
             socketService.on('wallet_updated', handleWalletUpdated);
+            socketService.on('user:online', handleUserOnline);
+            socketService.on('user:offline', handleUserOffline);
+            socketService.on('typing:start', handleTypingStart);
+            socketService.on('typing:stop', handleTypingStop);
 
             return () => {
                 socketService.off('new_message', handleNewMessage);
@@ -234,6 +286,10 @@ export const useSocket = () => {
                 socketService.off('message_edited', handleMessageEdited);
                 socketService.off('booking_updated', handleBookingUpdated);
                 socketService.off('wallet_updated', handleWalletUpdated);
+                socketService.off('user:online', handleUserOnline);
+                socketService.off('user:offline', handleUserOffline);
+                socketService.off('typing:start', handleTypingStart);
+                socketService.off('typing:stop', handleTypingStop);
             };
         } else {
             socketService.disconnect();

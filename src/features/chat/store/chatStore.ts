@@ -1,58 +1,80 @@
 import { create } from 'zustand';
 import type { Chat, Message } from '../types/chat.types';
 
+export interface BookingContext {
+    serviceTitle: string;
+    serviceDescription?: string;
+    bookingRef?: string;
+    price?: number;
+    status?: string;
+}
+
 interface ChatState {
-    // Active chat
     activeChat: Chat | null;
     setActiveChat: (chat: Chat | null) => void;
+    updateActiveChatOnlineStatus: (userId: string, isOnline: boolean) => void;
 
-    // Reply state
+    bookingContext: BookingContext | null;
+    setBookingContext: (ctx: BookingContext | null) => void;
+
     replyingTo: Message | null;
     setReplyingTo: (message: Message | null) => void;
     clearReply: () => void;
 
-    // Edit state
     editingMessage: Message | null;
     setEditingMessage: (message: Message | null) => void;
     clearEdit: () => void;
 
-    // Unread count
     unreadCount: number;
     setUnreadCount: (count: number) => void;
 
-    // Search/filter
     searchQuery: string;
     setSearchQuery: (query: string) => void;
 
-    // UI state
     isMobileChatOpen: boolean;
     setMobileChatOpen: (isOpen: boolean) => void;
+
+    // chatId -> true if the other user is currently typing
+    typingChats: Record<string, boolean>;
+    setTyping: (chatId: string, isTyping: boolean) => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
-    // Active chat
+export const useChatStore = create<ChatState>((set, get) => ({
     activeChat: null,
     setActiveChat: (chat) => set({ activeChat: chat }),
+    updateActiveChatOnlineStatus: (userId, isOnline) => {
+        const { activeChat } = get();
+        if (activeChat && (activeChat as any).otherParticipant?.id === userId) {
+            set({
+                activeChat: {
+                    ...activeChat,
+                    otherParticipant: { ...(activeChat as any).otherParticipant, isOnline },
+                },
+            });
+        }
+    },
 
-    // Reply state
+    bookingContext: null,
+    setBookingContext: (ctx) => set({ bookingContext: ctx }),
+
     replyingTo: null,
     setReplyingTo: (message) => set({ replyingTo: message }),
     clearReply: () => set({ replyingTo: null }),
 
-    // Edit state
     editingMessage: null,
     setEditingMessage: (message) => set({ editingMessage: message }),
     clearEdit: () => set({ editingMessage: null }),
 
-    // Unread count
     unreadCount: 0,
     setUnreadCount: (count) => set({ unreadCount: count }),
 
-    // Search/filter
     searchQuery: '',
     setSearchQuery: (query) => set({ searchQuery: query }),
 
-    // UI state
     isMobileChatOpen: false,
     setMobileChatOpen: (isOpen) => set({ isMobileChatOpen: isOpen }),
+
+    typingChats: {},
+    setTyping: (chatId, isTyping) =>
+        set((state) => ({ typingChats: { ...state.typingChats, [chatId]: isTyping } })),
 }));

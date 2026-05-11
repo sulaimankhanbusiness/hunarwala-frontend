@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatApi } from '../api/chat.api';
+import { useChatStore } from '../store/chatStore';
 import type { SendMessagePayload } from '../types/chat.types';
 
 export const useSendMessage = (chatId: string) => {
@@ -46,9 +47,36 @@ export const useMarkAsRead = () => {
     return useMutation({
         mutationFn: ({ chatId, lastMessageId }: { chatId: string; lastMessageId?: string }) =>
             chatApi.markAsRead(chatId, lastMessageId),
-        onSuccess: (_, variables) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['chats'] });
             queryClient.invalidateQueries({ queryKey: ['unread-count'] });
+        },
+    });
+};
+
+export const useReactToMessage = (chatId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ messageId, emoji }: { messageId: string; emoji: string }) =>
+            chatApi.reactToMessage(chatId, messageId, emoji),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
+        },
+    });
+};
+
+export const useDeleteChat = () => {
+    const queryClient = useQueryClient();
+    const setActiveChat = useChatStore((state) => state.setActiveChat);
+    const setMobileChatOpen = useChatStore((state) => state.setMobileChatOpen);
+
+    return useMutation({
+        mutationFn: (chatId: string) => chatApi.deleteChat(chatId),
+        onSuccess: () => {
+            setActiveChat(null);
+            setMobileChatOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['chats'] });
         },
     });
 };

@@ -67,7 +67,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
             <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
                 <div className="p-8 pb-0">
                     <div className="flex items-center justify-between mb-8">
-                        <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                        <div className="bg-indigo-50 p-3 rounded-2xl text-indigo-600">
                             <Landmark size={24} />
                         </div>
                         <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -101,7 +101,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                                 required
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
-                                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-lg"
+                                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-bold text-lg"
                                 placeholder="Enter amount..."
                             />
                         </div>
@@ -113,7 +113,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                                     flex flex-col items-center justify-center w-full min-h-[160px] 
                                     border-2 border-dashed rounded-[2rem] cursor-pointer 
                                     transition-all duration-300 group
-                                    ${previewUrl ? 'border-blue-500 bg-blue-50/10' : 'border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-blue-400'}
+                                    ${previewUrl ? 'border-indigo-500 bg-indigo-50/10' : 'border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-indigo-400'}
                                 `}>
                                     {previewUrl ? (
                                         <div className="relative w-full h-full p-2 group">
@@ -130,7 +130,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                                     ) : (
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <div className="bg-white p-4 rounded-2xl shadow-sm mb-3 group-hover:scale-110 transition-transform">
-                                                <Upload size={24} className="text-blue-500" />
+                                                <Upload size={24} className="text-indigo-500" />
                                             </div>
                                             <p className="text-sm font-bold text-gray-900">Upload Transfer Proof</p>
                                             <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">PNG, JPG up to 5MB</p>
@@ -147,9 +147,9 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                             </div>
                         </div>
 
-                        <div className="p-4 bg-blue-50 rounded-2xl flex items-start gap-4">
-                            <AlertCircle size={18} className="text-blue-500 shrink-0 mt-0.5" />
-                            <p className="text-[11px] text-blue-700 font-medium leading-relaxed uppercase tracking-tight">
+                        <div className="p-4 bg-indigo-50 rounded-2xl flex items-start gap-4">
+                            <AlertCircle size={18} className="text-indigo-500 shrink-0 mt-0.5" />
+                            <p className="text-[11px] text-indigo-700 font-medium leading-relaxed uppercase tracking-tight">
                                 Admin reviews may take up to 24 hours. Your balance will update once approved.
                             </p>
                         </div>
@@ -157,7 +157,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 text-white rounded-2xl font-black transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 active:scale-95"
+                            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 active:scale-95"
                         >
                             {isSubmitting ? (
                                 <>

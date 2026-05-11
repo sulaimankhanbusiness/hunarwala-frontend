@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import type { HelperProfile, HelperSearchParams, RegisterHelperDto } from '../types/helpers.types';
+import type { HelperProfile, HelperSearchParams, MyProfile, RegisterHelperDto } from '../types/helpers.types';
 
 export const getHelpers = async (params: HelperSearchParams) => {
   return api.get('/users/search', { params }) as Promise<any>;
@@ -7,6 +7,16 @@ export const getHelpers = async (params: HelperSearchParams) => {
 
 export const getHelperProfile = async (id: string): Promise<HelperProfile> => {
   return api.get(`/users/profile?userId=${id}`) as Promise<HelperProfile>;
+};
+
+export const getMyProfile = async (): Promise<MyProfile> => {
+  return api.get('/users/me') as Promise<MyProfile>;
+};
+
+export const updateMyProfile = async (data: FormData): Promise<MyProfile> => {
+  return api.patch('/users/helper-profile', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }) as Promise<MyProfile>;
 };
 
 export const getTopRatedProfessionals = async (city: string, page = 1, limit = 10) => {

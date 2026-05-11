@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Star, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/utils/error';
@@ -87,7 +87,7 @@ export const ReviewDialog = ({ isOpen, onClose, bookingId, onSuccess }: ReviewDi
                             Additional Comments (Optional)
                         </label>
                         <textarea
-                            className="w-full p-4 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none bg-gray-50/50"
+                            className="w-full p-4 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all resize-none bg-gray-50/50"
                             rows={4}
                             placeholder="Tell others how it went..."
                             value={comment}
@@ -106,7 +106,7 @@ export const ReviewDialog = ({ isOpen, onClose, bookingId, onSuccess }: ReviewDi
                     <button
                         onClick={handleSubmit}
                         disabled={loading || rating === 0}
-                        className="flex-1 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-blue-100 transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-indigo-100 transition-all flex items-center justify-center gap-2"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Review'}
                     </button>
