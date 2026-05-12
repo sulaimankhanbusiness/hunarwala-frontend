@@ -1,11 +1,11 @@
-import type { Chat } from '../types/chat.types';
+import type { Chat, Message, User } from '../types/chat.types';
 
 export const truncateText = (text: string, maxLength: number): string => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
 };
 
-export const getMessagePreview = (message: any): string => {
+export const getMessagePreview = (message: Message): string => {
     if (message.isDeleted) return 'This message was deleted';
     if (message.contentType === 'image') return '📷 Photo';
     if (message.contentType === 'file') return '📎 File';
@@ -17,16 +17,10 @@ export const getMessagePreview = (message: any): string => {
     return truncateText(message.content ?? '', 50);
 };
 
-export const getOtherUser = (chat: Chat, currentUserId?: string) => {
-    // Prefer pre-normalized field
-    const single = (chat as any).otherParticipant ?? (chat as any).participant;
-    if (single && (!currentUserId || single.id !== currentUserId)) return single;
-
-    // Handle participants array — filter out self if currentUserId is known
-    const arr: any[] | undefined = (chat as any).participants;
-    if (Array.isArray(arr) && arr.length > 0) {
-        return (currentUserId ? arr.find((p) => p.id !== currentUserId) : null) ?? arr[0];
+export const getOtherUser = (chat: Chat, currentUserId?: string): User | null => {
+    // Chat is normalized by chatApi.normalizeChat — otherParticipant is always set
+    if (chat.otherParticipant && (!currentUserId || chat.otherParticipant.id !== currentUserId)) {
+        return chat.otherParticipant;
     }
-
-    return single ?? null;
+    return null;
 };

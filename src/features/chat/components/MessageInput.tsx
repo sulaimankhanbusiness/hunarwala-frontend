@@ -145,9 +145,9 @@ export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputP
         <div className="border-t border-gray-100 bg-[#F8FAFC]/50 backdrop-blur-md pb-safe">
             {/* Reply/Edit Preview */}
             {(replyingTo || editingMessage) && (
-                <div className="px-6 py-3 bg-blue-50/80 backdrop-blur-sm border-b border-blue-100 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
+                <div className="px-6 py-3 bg-indigo-50/80 backdrop-blur-sm border-b border-indigo-100 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
                     <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-0.5">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-0.5">
                             {editingMessage ? 'Editing message' : `Replying to ${replyingTo?.sender?.fullName || 'Unknown'}`}
                         </p>
                         <p className="text-sm text-gray-700 truncate font-medium">
@@ -156,9 +156,9 @@ export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputP
                     </div>
                     <button
                         onClick={handleCancel}
-                        className="ml-4 p-1.5 hover:bg-blue-100 rounded-full transition-colors group"
+                        className="ml-4 p-1.5 hover:bg-indigo-100 rounded-full transition-colors group"
                     >
-                        <X className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                        <X className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
                     </button>
                 </div>
             )}
@@ -169,7 +169,7 @@ export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputP
                     {/* Attachment Button */}
                     <button
                         disabled={disabled}
-                        className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all disabled:opacity-50"
+                        className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all disabled:opacity-50"
                         title="Attach file (coming soon)"
                     >
                         <Paperclip className="w-5 h-5" />
@@ -179,7 +179,7 @@ export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputP
                     <button
                         onClick={handleShareLocation}
                         disabled={disabled || isLocating}
-                        className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all disabled:opacity-50"
+                        className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all disabled:opacity-50"
                         title="Share location"
                     >
                         {isLocating ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
@@ -196,7 +196,7 @@ export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputP
                         placeholder="Type a message..."
                         disabled={disabled}
                         rows={1}
-                        className="w-full px-5 py-3 pr-12 bg-white border border-gray-100 rounded-2xl shadow-sm resize-none focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all text-sm leading-relaxed placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-5 py-3 pr-12 bg-white border border-gray-100 rounded-2xl shadow-sm resize-none focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all text-sm leading-relaxed placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ maxHeight: '150px' }}
                     />
 
@@ -212,7 +212,7 @@ export const MessageInput = ({ chatId, onSend, onEdit, disabled }: MessageInputP
                     className={clsx(
                         "p-3 rounded-2xl transition-all duration-300 shadow-lg mb-0.5",
                         message.trim() && !disabled
-                            ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-blue-200 hover:scale-105 active:scale-95"
+                            ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-indigo-200 hover:scale-105 active:scale-95"
                             : "bg-gray-100 text-gray-300 shadow-none grayscale"
                     )}
                 >

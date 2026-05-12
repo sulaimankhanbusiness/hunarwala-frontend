@@ -25,9 +25,6 @@ interface ChatState {
     setEditingMessage: (message: Message | null) => void;
     clearEdit: () => void;
 
-    unreadCount: number;
-    setUnreadCount: (count: number) => void;
-
     searchQuery: string;
     setSearchQuery: (query: string) => void;
 
@@ -44,11 +41,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     setActiveChat: (chat) => set({ activeChat: chat }),
     updateActiveChatOnlineStatus: (userId, isOnline) => {
         const { activeChat } = get();
-        if (activeChat && (activeChat as any).otherParticipant?.id === userId) {
+        if (activeChat?.otherParticipant?.id === userId) {
             set({
                 activeChat: {
                     ...activeChat,
-                    otherParticipant: { ...(activeChat as any).otherParticipant, isOnline },
+                    otherParticipant: { ...activeChat.otherParticipant, isOnline },
                 },
             });
         }
@@ -64,9 +61,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     editingMessage: null,
     setEditingMessage: (message) => set({ editingMessage: message }),
     clearEdit: () => set({ editingMessage: null }),
-
-    unreadCount: 0,
-    setUnreadCount: (count) => set({ unreadCount: count }),
 
     searchQuery: '',
     setSearchQuery: (query) => set({ searchQuery: query }),

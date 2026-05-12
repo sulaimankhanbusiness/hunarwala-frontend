@@ -7,6 +7,7 @@ import { MessageInput } from './MessageInput';
 import { useSendMessage, useEditMessage, useDeleteMessage, useMarkAsRead, useReactToMessage } from '../hooks/useChatMutations';
 import { MessageCircle, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { socketService } from '@/lib/socket';
 
 
 interface ChatWindowProps {
@@ -30,8 +31,16 @@ export const ChatWindow = ({ currentUserId }: ChatWindowProps) => {
         if (activeChat && activeChat.unreadCount > 0) {
             markAsReadMutation.mutate({ chatId: activeChat.id });
         }
-        // Reset safety notice per chat
         setSafetyDismissed(false);
+    }, [activeChat?.id]);
+
+    // Join the chat room so typing events are broadcast correctly
+    useEffect(() => {
+        if (!activeChat?.id) return;
+        socketService.emit('chat:join', { chatId: activeChat.id });
+        return () => {
+            socketService.emit('chat:leave', { chatId: activeChat.id });
+        };
     }, [activeChat?.id]);
 
     const handleSendMessage = (content: string, replyToId?: string, contentType: 'text' | 'location' = 'text', metadata?: any) => {

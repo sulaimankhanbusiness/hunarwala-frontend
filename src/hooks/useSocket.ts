@@ -31,18 +31,24 @@ export const useSocket = () => {
 
                 // Update messages list cache
                 queryClient.setQueryData(['messages', message.chatId], (oldData: any) => {
-                    if (!oldData) return oldData;
+                    if (!oldData) {
+                        // Cache miss — trigger a refetch so the UI picks up the new message
+                        queryClient.invalidateQueries({ queryKey: ['messages', message.chatId] });
+                        return oldData;
+                    }
 
-                    const allMessages = oldData.pages.flatMap((p: any) => p.items);
+                    const allMessages = oldData.pages.flatMap((p: any) => p.messages ?? []);
                     if (allMessages.find((m: any) => m.id === message.id)) return oldData;
 
-                    // Pages are stored newest-first; MessageList reverses the flat array
-                    // for display. Prepend to page 0 so the message lands at the bottom.
+                    // pages[0] = newest page; MessageList reverses pages for display,
+                    // so APPEND to pages[0].messages so the new message lands at the bottom.
                     const newPages = [...oldData.pages];
+                    const firstPage = newPages[0];
+                    const existingMessages = firstPage.messages ?? [];
                     newPages[0] = {
-                        ...newPages[0],
-                        items: [message, ...newPages[0].items],
-                        total: (newPages[0].total || 0) + 1
+                        ...firstPage,
+                        messages: [...existingMessages, message],
+                        total: (firstPage.total || 0) + 1,
                     };
                     return { ...oldData, pages: newPages };
                 });
@@ -125,11 +131,11 @@ export const useSocket = () => {
                     if (!oldData) return oldData;
                     const newPages = oldData.pages.map((page: any) => ({
                         ...page,
-                        items: page.items.map((m: any) =>
+                        messages: (page.messages ?? []).map((m: any) =>
                             m.senderUserId === userId
                                 ? { ...m, status: 'read', readAt: new Date().toISOString() }
                                 : m
-                        )
+                        ),
                     }));
                     return { ...oldData, pages: newPages };
                 });
@@ -164,11 +170,11 @@ export const useSocket = () => {
                     if (!oldData) return oldData;
                     const newPages = oldData.pages.map((page: any) => ({
                         ...page,
-                        items: page.items.map((m: any) =>
+                        messages: (page.messages ?? []).map((m: any) =>
                             m.id === messageId
                                 ? { ...m, isDeleted: true, content: 'This message was deleted' }
                                 : m
-                        )
+                        ),
                     }));
                     return { ...oldData, pages: newPages };
                 });
@@ -180,11 +186,11 @@ export const useSocket = () => {
                     if (!oldData) return oldData;
                     const newPages = oldData.pages.map((page: any) => ({
                         ...page,
-                        items: page.items.map((m: any) =>
+                        messages: (page.messages ?? []).map((m: any) =>
                             m.id === message.id
                                 ? { ...m, content: message.content, editedAt: message.editedAt }
                                 : m
-                        )
+                        ),
                     }));
                     return { ...oldData, pages: newPages };
                 });

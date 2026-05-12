@@ -21,10 +21,19 @@ export const MessageList = ({ chatId, currentUserId, onEdit, onDelete, onReply, 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const observerTarget = useRef<HTMLDivElement>(null);
 
+    // participants array contains the other user(s) — keyed by their userId
+    const participantMap = Object.fromEntries(
+        (data?.pages?.[0]?.participants ?? []).map(p => [p.id, p])
+    );
+
     // pages[0] = most recent batch, pages[n] = oldest batch
     // Reverse pages so oldest comes first, then flatten
+    // API returns sender: null — inject from participants so avatars render
     const allMessages: Message[] = data?.pages
-        ? [...data.pages].reverse().flatMap(p => p.messages ?? [])
+        ? [...data.pages].reverse().flatMap(p => p.messages ?? []).map(msg => ({
+            ...msg,
+            sender: msg.sender ?? participantMap[msg.senderUserId] ?? undefined,
+        }))
         : [];
 
     // Scroll to bottom on initial load and new messages
