@@ -82,7 +82,7 @@ function getActions(type) {
 function resolveLink(data) {
   if (data.link)      return data.link;
   if (data.chatId)    return `/chats?chatId=${data.chatId}`;
-  if (data.bookingId) return `/bookings/${data.bookingId}`;
+  if (data.bookingId) return `/bookings`;
   const type = data.type || '';
   if (type.includes('wallet') || type === 'topup_approved' || type === 'topup_rejected' || type === 'manual_adjustment') return '/wallet';
   if (type === 'helper_approved' || type === 'helper_rejected' || type === 'helper_flagged' || type === 'helper_status') return '/profile';
