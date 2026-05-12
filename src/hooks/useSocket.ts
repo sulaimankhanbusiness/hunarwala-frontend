@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { socketService } from '@/lib/socket';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ import { useChatStore } from '@/features/chat/store/chatStore';
 export const useSocket = () => {
     const { token, isAuthenticated, user } = useAuthStore();
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     useEffect(() => {
         if (isAuthenticated && token) {
@@ -249,11 +251,12 @@ export const useSocket = () => {
                 queryClient.invalidateQueries({ queryKey: ['bookings'] });
                 queryClient.invalidateQueries({ queryKey: ['booking', data.bookingId] });
 
-                // Increment nav badge so user sees a count even if not on /bookings
                 useNavBadgeStore.getState().incrementBookings();
 
                 if (data.message) {
-                    toast.success(data.message);
+                    toast.success(data.message, {
+                        action: { label: 'View', onClick: () => router.push('/bookings') },
+                    });
                 }
             };
 
