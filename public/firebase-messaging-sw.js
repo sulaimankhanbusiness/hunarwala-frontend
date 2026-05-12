@@ -25,6 +25,80 @@ self.addEventListener('install',  ()      => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
 // ---------------------------------------------------------------------------
+// Map notification type → action buttons shown under the notification
+// ---------------------------------------------------------------------------
+function getActions(type) {
+  const dismiss = { action: 'dismiss', title: 'Dismiss' };
+  switch (type) {
+    // ── Chat ──────────────────────────────────────────────────────────────
+    case 'new_message':
+    case 'chat_created':
+    case 'message_edited':
+      return [{ action: 'open', title: 'Open Chat' }, dismiss];
+
+    // ── Booking — new request ─────────────────────────────────────────────
+    case 'new_booking':
+    case 'booking_request':
+      return [{ action: 'open', title: 'View Request' }, dismiss];
+
+    // ── Booking — state changes ───────────────────────────────────────────
+    case 'booking_accepted':
+    case 'booking_started':
+    case 'booking_updated':
+    case 'booking_cancelled':
+    case 'booking_expired':
+    case 'booking_disputed':
+      return [{ action: 'open', title: 'View Booking' }, dismiss];
+
+    // ── Booking — completion / review ─────────────────────────────────────
+    case 'booking_completed':
+    case 'booking_settled':
+    case 'review_request':
+    case 'job_completed':
+      return [{ action: 'open', title: 'Rate Now' }, dismiss];
+
+    // ── Wallet ────────────────────────────────────────────────────────────
+    case 'topup_approved':
+    case 'topup_rejected':
+    case 'manual_adjustment':
+    case 'wallet_updated':
+      return [{ action: 'open', title: 'View Wallet' }, dismiss];
+
+    // ── Helper profile ────────────────────────────────────────────────────
+    case 'helper_approved':
+    case 'helper_rejected':
+    case 'helper_flagged':
+    case 'helper_status':
+      return [{ action: 'open', title: 'View Profile' }, dismiss];
+
+    default:
+      return [{ action: 'open', title: 'Open App' }, dismiss];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Resolve the deep-link for a notification based on its data payload
+// ---------------------------------------------------------------------------
+function resolveLink(data) {
+  if (data.link)      return data.link;
+  if (data.chatId)    return `/chats?chatId=${data.chatId}`;
+  if (data.bookingId) return `/bookings/${data.bookingId}`;
+  const type = data.type || '';
+  if (type.includes('wallet') || type === 'topup_approved' || type === 'topup_rejected' || type === 'manual_adjustment') return '/wallet';
+  if (type === 'helper_approved' || type === 'helper_rejected' || type === 'helper_flagged' || type === 'helper_status') return '/profile';
+  return '/';
+}
+
+// ---------------------------------------------------------------------------
+// Resolve notification tag for grouping (replaces older notif of same context)
+// ---------------------------------------------------------------------------
+function resolveTag(data) {
+  if (data.chatId)    return `chat_${data.chatId}`;
+  if (data.bookingId) return `booking_${data.bookingId}`;
+  return data.type || 'hunarwala';
+}
+
+// ---------------------------------------------------------------------------
 // Background message handler
 //
 // This fires ONLY when the app tab is closed or in a background tab.
@@ -36,8 +110,6 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 //   • No open tabs      → show an OS notification
 // ---------------------------------------------------------------------------
 messaging.onBackgroundMessage((payload) => {
-  console.log('[FCM SW] Background message received:', payload);
-
   const title = payload.notification?.title || payload.data?.title || 'HunarWala';
   const body  = payload.notification?.body  || payload.data?.body  || '';
   const data  = payload.data || {};
@@ -48,36 +120,51 @@ messaging.onBackgroundMessage((payload) => {
       const visibleClient = clients.find((c) => c.visibilityState === 'visible');
 
       if (visibleClient) {
-        // App tab is open and focused — hand off to the page for in-app toast
         visibleClient.postMessage({ type: 'FCM_MESSAGE', title, body, data });
       } else if (clients.length > 0) {
-        // App is open but in a background tab — post to all, page will handle it
         clients.forEach((c) => c.postMessage({ type: 'FCM_MESSAGE', title, body, data }));
       } else {
-        // App is closed — show OS notification
-        self.registration.showNotification(title, {
+        // App is closed — show a rich OS notification
+        const type = data.type || '';
+        const link = resolveLink(data);
+
+        const options = {
           body,
-          icon:  '/logo.png',
-          badge: '/logo.png',
-          data:  { ...data, link: data.link || '/' },
-        });
+          icon:               data.icon || '/logo.png',
+          badge:              '/badge-icon.png',
+          image:              data.image || undefined,
+          data:               { ...data, link },
+          tag:                resolveTag(data),
+          renotify:           true,
+          requireInteraction: false,
+          actions:            getActions(type),
+        };
+
+        self.registration.showNotification(title, options);
       }
     });
 });
 
 // ---------------------------------------------------------------------------
-// Notification click — focus an existing window or open a new one
+// Notification click — handle action buttons and default tap
 // ---------------------------------------------------------------------------
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = event.notification.data?.link || '/';
+
+  if (event.action === 'dismiss') return;
+
+  const url = event.notification.data?.link || '/chats';
 
   event.waitUntil(
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((clients) => {
-        const match = clients.find((c) => c.url.includes(url) && 'focus' in c);
-        return match ? match.focus() : self.clients.openWindow(url);
+        const match = clients.find((c) => 'focus' in c);
+        if (match) {
+          match.postMessage({ type: 'NAVIGATE', url });
+          return match.focus();
+        }
+        return self.clients.openWindow(url);
       })
   );
 });

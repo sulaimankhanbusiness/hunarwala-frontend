@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   initNotifications,
@@ -30,6 +31,7 @@ function showFcmToast(title: string, body: string, type: NotifType, link?: strin
 
 export function useNotifications(token: string | null) {
   const addNotification = useNotificationStore((s) => s.addNotification);
+  const router = useRouter();
 
   useEffect(() => {
     if (!token || typeof window === 'undefined') return;
@@ -80,6 +82,10 @@ export function useNotifications(token: string | null) {
     // The SW posts FCM_MESSAGE to any open clients instead of showing an
     // OS notification, so users get a smooth in-app experience on return.
     const handleSWMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'NAVIGATE') {
+        router.push(event.data.url);
+        return;
+      }
       if (event.data?.type !== 'FCM_MESSAGE') return;
 
       const {
@@ -102,5 +108,5 @@ export function useNotifications(token: string | null) {
       navigator.serviceWorker.removeEventListener('message', handleSWMessage);
       unsubscribeForeground?.();
     };
-  }, [token, addNotification]);
+  }, [token, addNotification, router]);
 }
