@@ -10,7 +10,8 @@ import {
     TrendingUp, Percent, BadgeCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import TopUpModal from './TopUpModal';
+// import TopUpModal from './TopUpModal';
+import TopUpModalComingSoon from './TopUpModalComingSoon';
 import ScrollReveal from '@/components/ScrollReveal';
 
 export default function WalletDashboard() {
@@ -273,7 +274,7 @@ export default function WalletDashboard() {
                 </div>
             </div>
 
-            <TopUpModal
+            <TopUpModalComingSoon
                 isOpen={isTopUpModalOpen}
                 onClose={() => setIsTopUpModalOpen(false)}
                 onSuccess={refetchWallet}

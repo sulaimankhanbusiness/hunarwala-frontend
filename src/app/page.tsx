@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import HeroContent from './_components/HeroContent';
 import CategoryGrid from './_components/CategoryGrid';
+import PromoMarquee from './_components/PromoMarquee';
 
 interface ApiCategory { id: number; name: string; slug: string }
 
@@ -80,6 +81,9 @@ export default async function Home() {
   const categories = (await fetchCategories()).slice(0, 6);
   return (
     <div className="min-h-screen">
+
+      {/* ── Promo Marquee ─────────────────────────────────────────────────── */}
+      <PromoMarquee />
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-indigo-50/40 to-white">
