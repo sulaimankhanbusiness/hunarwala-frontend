@@ -82,7 +82,7 @@ export async function initNotifications(): Promise<string | null> {
     registration = await navigator.serviceWorker.register(swUrl, { scope: '/' });
     // Wait until the SW is active before requesting the token
     await navigator.serviceWorker.ready;
-    console.log('[FCM] Service worker registered and ready');
+    if (process.env.NODE_ENV === 'development') console.log('[FCM] Service worker registered and ready');
   } catch (e) {
     console.error('[FCM] Service worker registration failed:', e);
     return null;
@@ -95,7 +95,7 @@ export async function initNotifications(): Promise<string | null> {
       console.warn('[FCM] getToken returned empty — check VAPID key and Firebase project settings');
       return null;
     }
-    console.log('[FCM] Token obtained:', token.slice(0, 20) + '...');
+    if (process.env.NODE_ENV === 'development') console.log('[FCM] Token obtained:', token.slice(0, 20) + '...');
     return token;
   } catch (e) {
     console.error('[FCM] getToken failed:', e);

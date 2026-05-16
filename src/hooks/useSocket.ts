@@ -15,9 +15,11 @@ export const useSocket = () => {
     const queryClient = useQueryClient();
     const router = useRouter();
 
+    const dev = process.env.NODE_ENV === 'development';
+
     useEffect(() => {
         if (isAuthenticated && token) {
-            console.log('[useSocket] Connecting...');
+            if (dev) console.log('[useSocket] Connecting...');
             socketService.connect(token);
 
             // Fetch initial unread message count so the badge is accurate on first load
@@ -29,7 +31,7 @@ export const useSocket = () => {
 
             // ── Message events ────────────────────────────────────────────────
             const handleNewMessage = (message: any) => {
-                console.log('[Socket] New message received:', message);
+                if (dev) console.log('[Socket] New message received:', message);
 
                 // Update messages list cache
                 queryClient.setQueryData(['messages', message.chatId], (oldData: any) => {
@@ -85,16 +87,23 @@ export const useSocket = () => {
                     return { ...oldData, pages: newPages };
                 });
 
-                // Increment nav badge for messages not sent by the current user
+                // Sync nav badge from cache (prevents double-count if event fires twice)
                 if (message.senderUserId !== user?.id) {
-                    console.log('New message from', message);
-                    useNavBadgeStore.getState().incrementMessages();
+                    const chatsData = queryClient.getQueryData<any>(['chats']);
+                    if (chatsData) {
+                        const total = chatsData.pages
+                            .flatMap((p: any) => p.items)
+                            .reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0);
+                        useNavBadgeStore.getState().setUnreadMessages(total);
+                    } else {
+                        useNavBadgeStore.getState().incrementMessages();
+                    }
                     toast.info(`New message from ${message.sender?.fullName || 'Someone'}`);
                 }
             };
 
             const handleChatUpdated = (data: any) => {
-                console.log('[Socket] Chat updated:', data);
+                if (dev) console.log('[Socket] Chat updated:', data);
                 queryClient.setQueryData(['chats'], (oldData: any) => {
                     if (!oldData) return oldData;
 
@@ -125,7 +134,7 @@ export const useSocket = () => {
             };
 
             const handleMessagesRead = (data: any) => {
-                console.log('[Socket] Messages read:', data);
+                if (dev) console.log('[Socket] Messages read:', data);
                 const { chatId, userId } = data;
 
                 // Mark all messages in the chat as read
@@ -165,7 +174,7 @@ export const useSocket = () => {
             };
 
             const handleMessageDeleted = (data: any) => {
-                console.log('[Socket] Message deleted:', data);
+                if (dev) console.log('[Socket] Message deleted:', data);
                 const { chatId, messageId } = data;
 
                 queryClient.setQueryData(['messages', chatId], (oldData: any) => {
@@ -183,7 +192,7 @@ export const useSocket = () => {
             };
 
             const handleMessageEdited = (message: any) => {
-                console.log('[Socket] Message edited:', message);
+                if (dev) console.log('[Socket] Message edited:', message);
                 queryClient.setQueryData(['messages', message.chatId], (oldData: any) => {
                     if (!oldData) return oldData;
                     const newPages = oldData.pages.map((page: any) => ({
@@ -247,7 +256,7 @@ export const useSocket = () => {
 
             // ── Booking events ────────────────────────────────────────────────
             const handleBookingUpdated = (data: any) => {
-                console.log('[Socket] Booking updated:', data);
+                if (dev) console.log('[Socket] Booking updated:', data);
                 queryClient.invalidateQueries({ queryKey: ['bookings'] });
                 queryClient.invalidateQueries({ queryKey: ['booking', data.bookingId] });
 
@@ -262,7 +271,7 @@ export const useSocket = () => {
 
             // ── Wallet events ─────────────────────────────────────────────────
             const handleWalletUpdated = (data: any) => {
-                console.log('[Socket] Wallet updated:', data);
+                if (dev) console.log('[Socket] Wallet updated:', data);
                 queryClient.invalidateQueries({ queryKey: ['wallet'] });
 
                 const typeLabels: Record<string, string> = {

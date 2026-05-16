@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { chatApi } from '../api/chat.api';
 import { useChatStore } from '../store/chatStore';
 import type { SendMessagePayload } from '../types/chat.types';
@@ -9,10 +10,11 @@ export const useSendMessage = (chatId: string) => {
     return useMutation({
         mutationFn: (payload: SendMessagePayload) => chatApi.sendMessage(chatId, payload),
         onSuccess: () => {
-            // Invalidate messages query to refetch
             queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
-            // Invalidate chats query to update last message
             queryClient.invalidateQueries({ queryKey: ['chats'] });
+        },
+        onError: () => {
+            toast.error('Failed to send message. Please try again.');
         },
     });
 };
@@ -26,6 +28,9 @@ export const useEditMessage = (chatId: string) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
         },
+        onError: () => {
+            toast.error('Failed to edit message.');
+        },
     });
 };
 
@@ -37,6 +42,9 @@ export const useDeleteMessage = (chatId: string) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
             queryClient.invalidateQueries({ queryKey: ['chats'] });
+        },
+        onError: () => {
+            toast.error('Failed to delete message.');
         },
     });
 };
@@ -63,6 +71,9 @@ export const useReactToMessage = (chatId: string) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
         },
+        onError: () => {
+            toast.error('Failed to add reaction.');
+        },
     });
 };
 
@@ -77,6 +88,9 @@ export const useDeleteChat = () => {
             setActiveChat(null);
             setMobileChatOpen(false);
             queryClient.invalidateQueries({ queryKey: ['chats'] });
+        },
+        onError: () => {
+            toast.error('Failed to delete chat.');
         },
     });
 };
