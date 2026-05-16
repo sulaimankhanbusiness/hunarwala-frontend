@@ -54,9 +54,11 @@ export default function Footer() {
 
         <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-400">© 2025 HunarWalaa. All rights reserved.</p>
-          <div className="flex space-x-6 text-sm text-gray-500">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
             <Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-gray-900">Terms of Service</Link>
+            <Link href="/cancellation" className="hover:text-gray-900">Cancellation Policy</Link>
+            <Link href="/ownership" className="hover:text-gray-900">Ownership</Link>
           </div>
         </div>
       </div>
