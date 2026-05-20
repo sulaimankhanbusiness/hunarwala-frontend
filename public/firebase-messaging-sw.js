@@ -109,8 +109,9 @@ function resolveTag(data) {
 // onMessage() — the SW does NOT receive it in that case.
 //
 // Strategy:
-//   • Open tab visible  → postMessage so the page can show an in-app toast
-//   • No open tabs      → show an OS notification
+//   • App tab visible → postMessage so the page can show an in-app toast
+//   • App backgrounded or closed → always show an OS notification with sound
+//     (postMessage to a backgrounded/suspended tab produces no sound)
 // ---------------------------------------------------------------------------
 messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || payload.data?.title || 'HunarWala';
@@ -123,28 +124,29 @@ messaging.onBackgroundMessage((payload) => {
       const visibleClient = clients.find((c) => c.visibilityState === 'visible');
 
       if (visibleClient) {
+        // User is actively looking at the app — let the page handle it (toast)
         visibleClient.postMessage({ type: 'FCM_MESSAGE', title, body, data });
-      } else if (clients.length > 0) {
-        clients.forEach((c) => c.postMessage({ type: 'FCM_MESSAGE', title, body, data }));
-      } else {
-        // App is closed — show a rich OS notification
-        const type = data.type || '';
-        const link = resolveLink(data);
-
-        const options = {
-          body,
-          icon:               data.icon || '/logo.png',
-          badge:              '/badge-icon.png',
-          image:              data.image || undefined,
-          data:               { ...data, link },
-          tag:                resolveTag(data),
-          renotify:           true,
-          requireInteraction: false,
-          actions:            getActions(type),
-        };
-
-        self.registration.showNotification(title, options);
+        return;
       }
+
+      // App is backgrounded or closed — show an OS notification so the phone
+      // rings/vibrates. A postMessage to a backgrounded tab produces no sound.
+      const type = data.type || '';
+      const link = resolveLink(data);
+
+      const options = {
+        body,
+        icon:               data.icon || '/logo.png',
+        badge:              '/badge-icon.png',
+        image:              data.image || undefined,
+        data:               { ...data, link },
+        tag:                resolveTag(data),
+        renotify:           true,
+        requireInteraction: false,
+        actions:            getActions(type),
+      };
+
+      self.registration.showNotification(title, options);
     });
 });
 
