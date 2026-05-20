@@ -90,12 +90,15 @@ function resolveLink(data) {
 }
 
 // ---------------------------------------------------------------------------
-// Resolve notification tag for grouping (replaces older notif of same context)
+// Resolve notification tag — each message gets a unique tag so the browser
+// never silently replaces an existing notification (same-tag replacement
+// suppresses sound/vibration even with renotify:true on most browsers).
 // ---------------------------------------------------------------------------
 function resolveTag(data) {
-  if (data.chatId)    return `chat_${data.chatId}`;
-  if (data.bookingId) return `booking_${data.bookingId}`;
-  return data.type || 'hunarwala';
+  const unique = data.messageId || data.id || Date.now();
+  if (data.chatId)    return `chat_${data.chatId}_${unique}`;
+  if (data.bookingId) return `booking_${data.bookingId}_${unique}`;
+  return `${data.type || 'hunarwala'}_${unique}`;
 }
 
 // ---------------------------------------------------------------------------
