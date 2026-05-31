@@ -34,10 +34,10 @@ export default function HelperSearch() {
 
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
   const [isCityDetecting, setIsCityDetecting] = useState(false);
-  const [selectedHelperIds, setSelectedHelperIds] = useState<string[]>([]);
+  const [selectedHelpers, setSelectedHelpers] = useState<{ id: string; userId: string }[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [singleBookingHelper, setSingleBookingHelper] = useState<{ id: string; name: string } | null>(null);
+  const [singleBookingHelper, setSingleBookingHelper] = useState<{ id: string; userId: string; name: string } | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('rating');
   const router = useRouter();
   const [searchParams, setSearchParams] = useState<{
@@ -114,12 +114,12 @@ export default function HelperSearch() {
   }, [pendingSkill, setPendingSkill]);
 
   const { isAuthenticated } = useAuthStore();
-  const handleBookNow = ({ id, name }: { id: string; name: string }) => {
+  const handleBookNow = ({ id, userId, name }: { id: string; userId: string; name: string }) => {
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
-    setSingleBookingHelper({ id, name });
+    setSingleBookingHelper({ id, userId, name });
   };
 
   const handleSearch = (manualLoc?: typeof location) => {
@@ -146,14 +146,14 @@ export default function HelperSearch() {
     setIsNearByActive(false);
     setUserLocation(null);
     setSearchParams({});
-    setSelectedHelperIds([]);
+    setSelectedHelpers([]);
   };
 
-  const toggleHelperSelection = (helperId: string) => {
-    setSelectedHelperIds(prev =>
-      prev.includes(helperId)
-        ? prev.filter(id => id !== helperId)
-        : [...prev, helperId]
+  const toggleHelperSelection = (helper: { id: string; userId: string }) => {
+    setSelectedHelpers(prev =>
+      prev.some(h => h.id === helper.id)
+        ? prev.filter(h => h.id !== helper.id)
+        : [...prev, helper]
     );
   };
 
@@ -203,8 +203,8 @@ export default function HelperSearch() {
   const helpers = [...rawHelpers].sort((a: any, b: any) => {
     switch (sortBy) {
       case 'rating':      return (b.averageRating || 0) - (a.averageRating || 0);
-      case 'price_asc':   return (a.ratePerHour || 0) - (b.ratePerHour || 0);
-      case 'price_desc':  return (b.ratePerHour || 0) - (a.ratePerHour || 0);
+      case 'price_asc':   return (a.dailyRate || 0) - (b.dailyRate || 0);
+      case 'price_desc':  return (b.dailyRate || 0) - (a.dailyRate || 0);
       case 'experience':  return (b.experienceYears || 0) - (a.experienceYears || 0);
       default:            return 0;
     }
@@ -428,8 +428,8 @@ export default function HelperSearch() {
                     <div className={`relative h-24 bg-gradient-to-br ${banner} flex-shrink-0`}>
                       {/* Select checkbox */}
                       <button
-                        onClick={() => toggleHelperSelection(helper.id)}
-                        className={`absolute top-3 left-3 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${selectedHelperIds.includes(helper.id) ? 'bg-white text-indigo-600 shadow-md scale-110' : 'bg-white/20 text-white/70 hover:bg-white/40 hover:text-white border border-white/30'}`}
+                        onClick={() => toggleHelperSelection({ id: helper.id, userId: helper.userId })}
+                        className={`absolute top-3 left-3 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${selectedHelpers.some(h => h.id === helper.id) ? 'bg-white text-indigo-600 shadow-md scale-110' : 'bg-white/20 text-white/70 hover:bg-white/40 hover:text-white border border-white/30'}`}
                       >
                         <CheckCircle2 size={14} strokeWidth={2.5} />
                       </button>
@@ -508,8 +508,8 @@ export default function HelperSearch() {
                         <div>
                           <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide leading-none mb-0.5">Starting from</p>
                           <p className="text-xl font-extrabold text-gray-900 leading-none">
-                            Rs.{helper.ratePerHour}
-                            <span className="text-xs font-medium text-gray-400">/hr</span>
+                            Rs. {helper.dailyRate}
+                            <span className="text-xs font-medium text-gray-400">/day</span>
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -520,7 +520,7 @@ export default function HelperSearch() {
                             Profile
                           </Link>
                           <button
-                            onClick={() => handleBookNow({ id: helper.id, name: helper.fullName })}
+                            onClick={() => handleBookNow({ id: helper.id, userId: helper.userId, name: helper.fullName })}
                             className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all text-xs flex items-center gap-1.5 shadow-md shadow-indigo-200/60"
                           >
                             <CalendarCheck size={13} />
@@ -538,12 +538,12 @@ export default function HelperSearch() {
       </div>
 
       {/* Floating Bulk Action Bar */}
-      {selectedHelperIds.length > 0 && (
+      {selectedHelpers.length > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-10 duration-500">
           <div className="bg-white/90 backdrop-blur-xl border border-indigo-100 px-6 py-4 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex items-center gap-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black shadow-lg shadow-indigo-200">
-                {selectedHelperIds.length}
+                {selectedHelpers.length}
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900 leading-none">Selected</p>
@@ -555,7 +555,7 @@ export default function HelperSearch() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setSelectedHelperIds([])}
+                onClick={() => setSelectedHelpers([])}
                 className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
               >
                 Clear
@@ -576,12 +576,13 @@ export default function HelperSearch() {
       <SimpleModal
         isOpen={!!singleBookingHelper}
         onClose={() => setSingleBookingHelper(null)}
-        title={`Book ${singleBookingHelper?.name || ''}`}
+        title="Schedule Service"
       >
         <BookingForm
-          helperIds={singleBookingHelper ? [singleBookingHelper.id] : []}
+          helperId={singleBookingHelper?.id}
+          helperUserId={singleBookingHelper?.userId}
           helperName={singleBookingHelper?.name || ''}
-          onSuccess={() => setSingleBookingHelper(null)}
+          onSuccess={() => { setSingleBookingHelper(null); router.push('/bookings'); }}
           onCancel={() => setSingleBookingHelper(null)}
         />
       </SimpleModal>
@@ -593,11 +594,11 @@ export default function HelperSearch() {
         title="Broadcast Booking Request"
       >
         <BookingForm
-          helperIds={selectedHelperIds}
-          helperName={`${selectedHelperIds.length} Selected Professionals`}
+          helperIds={selectedHelpers.map(h => h.id)}
+          helperName={`${selectedHelpers.length} Selected Professionals`}
           onSuccess={() => {
             setIsBookingModalOpen(false);
-            setSelectedHelperIds([]);
+            setSelectedHelpers([]);
           }}
           onCancel={() => setIsBookingModalOpen(false)}
         />

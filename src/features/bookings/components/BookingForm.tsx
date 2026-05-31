@@ -1,26 +1,70 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { bookingApi } from '../api/booking.api';
-import { Calendar, Clock, PenTool, DollarSign, Loader2 } from 'lucide-react';
+import { BookingType } from '../types/booking.types';
+import { getHelperPricing, getHelperPricingByHelperId } from '@/features/helpers/services/helpers.service';
+import type { HelperService, HelperPricing } from '@/features/helpers/types/helpers.types';
+import { Calendar, Clock, PenTool, Loader2, Briefcase, Clock3 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BookingFormProps {
     helperId?: string;
+    helperUserId?: string;
     helperIds?: string[];
     helperName: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCancel }: BookingFormProps) => {
+export const BookingForm = ({ helperId, helperUserId, helperIds, helperName, onSuccess, onCancel }: BookingFormProps) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [helperProfile, setHelperProfile] = useState<HelperPricing | null>(null);
+    const [broadcastRates, setBroadcastRates] = useState<number[]>([]);
     const [formData, setFormData] = useState({
         serviceDescription: '',
         scheduledDate: '',
         scheduledTime: '',
-        estimatedPrice: '',
+        bookingType: BookingType.DAILY,
+        serviceId: '',
     });
+
+    const isBroadcast = !!(helperIds && helperIds.length > 0);
+
+    // Single booking: fetch pricing via userId (profile page) or helperId (search page)
+    useEffect(() => {
+        if (isBroadcast) return;
+        if (helperUserId) {
+            getHelperPricing(helperUserId).then(setHelperProfile).catch(() => null);
+        } else if (helperId) {
+            getHelperPricingByHelperId(helperId).then(setHelperProfile).catch(() => null);
+        }
+    }, [helperId, helperUserId, isBroadcast]);
+
+    // Broadcast: fetch each helper's daily rate for the price range preview
+    useEffect(() => {
+        if (!isBroadcast || !helperIds?.length) return;
+        Promise.all(helperIds.map(id => getHelperPricingByHelperId(id).catch(() => null)))
+            .then(results => {
+                const rates = results
+                    .filter((r): r is HelperPricing => r !== null && !!r.dailyRate)
+                    .map(r => Number(r.dailyRate));
+                setBroadcastRates(rates);
+            });
+    }, [isBroadcast, helperIds]);
+
+    const selectedService = helperProfile?.services?.find((s: HelperService) => s.id === formData.serviceId);
+
+    const dailyRate = helperProfile?.dailyRate ? Number(helperProfile.dailyRate) : null;
+
+    const pricePreview = (() => {
+        if (isBroadcast) return null;
+        if (formData.bookingType === BookingType.SERVICE) {
+            return selectedService ? Number(selectedService.price) : null;
+        }
+        return dailyRate;
+    })();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,40 +73,48 @@ export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCanc
 
         try {
             const scheduledAt = new Date(`${formData.scheduledDate}T${formData.scheduledTime}`).toISOString();
-            const estimatedPrice = parseFloat(formData.estimatedPrice);
 
-            if (helperIds && helperIds.length > 0) {
-                // MULTI-HELPER BROADCAST FLOW
+            if (isBroadcast) {
                 await bookingApi.createBroadcastBooking({
-                    helperIds,
+                    helperIds: helperIds!,
                     serviceDescription: formData.serviceDescription,
                     scheduledAt,
-                    estimatedPrice,
                 });
             } else if (helperId) {
-                // SINGLE HELPER BOOKING FLOW
+                if (formData.bookingType === BookingType.SERVICE && !formData.serviceId) {
+                    setError('Please select a service');
+                    setLoading(false);
+                    return;
+                }
                 await bookingApi.createBooking({
                     helperId,
                     serviceDescription: formData.serviceDescription,
                     scheduledAt,
-                    estimatedPrice,
+                    bookingType: formData.bookingType,
+                    serviceId: formData.bookingType === BookingType.SERVICE ? formData.serviceId : undefined,
                 });
             } else {
                 throw new Error('No helpers selected for booking');
             }
 
+            toast.success(isBroadcast
+                ? `Broadcast sent to ${helperIds!.length} professional${helperIds!.length > 1 ? 's' : ''}!`
+                : 'Booking request sent!');
             onSuccess();
         } catch (err: any) {
-            setError(err.message || 'Failed to create booking');
+            setError(err?.response?.data?.message || err.message || 'Failed to create booking');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData((prev) => ({
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
             ...prev,
-            [e.target.name]: e.target.value,
+            [name]: value,
+            // Reset serviceId when switching back to DAILY
+            ...(name === 'bookingType' && value === BookingType.DAILY ? { serviceId: '' } : {}),
         }));
     };
 
@@ -72,18 +124,26 @@ export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCanc
                 <div className="bg-blue-100 p-2 rounded-full text-blue-600">
                     <PenTool className="w-4 h-4" />
                 </div>
-                <div>
+                <div className="flex-1">
                     <p className="text-sm font-bold text-blue-900 leading-tight">
-                        {helperIds && helperIds.length > 1 ? `Broadcast to ${helperIds.length} Pros` : `Booking for ${helperName}`}
+                        {isBroadcast ? `Broadcast to ${helperIds!.length} Pros` : `Booking for ${helperName}`}
                     </p>
                     <p className="text-[11px] text-blue-700 mt-0.5">
-                        {helperIds && helperIds.length > 1
-                            ? "We'll notify all selected professionals. The first one to accept gets the job!"
+                        {isBroadcast
+                            ? "We'll notify all selected professionals. The first to accept gets the job!"
                             : "Provide job details to send a request."}
                     </p>
+                    {isBroadcast && broadcastRates.length > 0 && (
+                        <p className="text-[11px] text-blue-600 font-semibold mt-1">
+                            {broadcastRates.length === 1
+                                ? `Rate: Rs. ${broadcastRates[0].toLocaleString('en-PK')}/day`
+                                : `Rates: Rs. ${Math.min(...broadcastRates).toLocaleString('en-PK')} – Rs. ${Math.max(...broadcastRates).toLocaleString('en-PK')}/day`}
+                        </p>
+                    )}
                 </div>
             </div>
 
+            {/* Service Description */}
             <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                     <PenTool className="w-4 h-4" /> Service Description
@@ -99,6 +159,7 @@ export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCanc
                 />
             </div>
 
+            {/* Date & Time */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -128,24 +189,68 @@ export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCanc
                 </div>
             </div>
 
-            <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" /> Estimated Price (PKR)
-                </label>
-                <div className="relative">
-                    <input
-                        type="number"
-                        name="estimatedPrice"
-                        required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
-                        placeholder="e.g. 1500"
-                        value={formData.estimatedPrice}
-                        onChange={handleChange}
-                    />
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rs.</div>
+            {/* Booking Type — only for single helper bookings */}
+            {!isBroadcast && (
+                <div className="space-y-3">
+                    <label className="text-sm font-semibold text-gray-700">Booking Type</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, bookingType: BookingType.DAILY, serviceId: '' }))}
+                            className={`flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                                formData.bookingType === BookingType.DAILY
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                            }`}
+                        >
+                            <Clock3 className="w-4 h-4 flex-shrink-0" />
+                            <span>Daily Rate</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, bookingType: BookingType.SERVICE }))}
+                            className={`flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                                formData.bookingType === BookingType.SERVICE
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                            }`}
+                        >
+                            <Briefcase className="w-4 h-4 flex-shrink-0" />
+                            <span>Specific Service</span>
+                        </button>
+                    </div>
+
+                    {/* Service selector */}
+                    {formData.bookingType === BookingType.SERVICE && helperProfile && (
+                        <select
+                            name="serviceId"
+                            value={formData.serviceId}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm bg-white"
+                        >
+                            <option value="">Select a service...</option>
+                            {helperProfile.services?.map((svc: HelperService) => (
+                                <option key={svc.id} value={svc.id}>
+                                    {svc.name} — Rs. {Number(svc.price).toLocaleString('en-PK')}
+                                    {svc.durationHrs ? ` (${svc.durationHrs}h)` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
+                    {/* Price preview */}
+                    {pricePreview !== null && (
+                        <div className="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5">
+                            <span className="text-xs text-emerald-700 font-semibold">
+                                {formData.bookingType === BookingType.DAILY ? 'Daily Rate' : 'Service Price'}
+                            </span>
+                            <span className="text-sm font-extrabold text-emerald-800">
+                                Rs. {pricePreview.toLocaleString('en-PK')}
+                            </span>
+                        </div>
+                    )}
                 </div>
-                {/* <p className="text-[10px] text-gray-500">Note: A 5% service fee will be added to the final amount.</p> */}
-            </div>
+            )}
 
             {error && (
                 <div className="p-3 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100 animate-in fade-in slide-in-from-top-1">
@@ -166,11 +271,7 @@ export const BookingForm = ({ helperId, helperIds, helperName, onSuccess, onCanc
                     disabled={loading}
                     className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-blue-200 flex items-center justify-center gap-2"
                 >
-                    {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        'Confirm Booking'
-                    )}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Booking'}
                 </button>
             </div>
         </form>

@@ -101,7 +101,7 @@ export default function EarnSection() {
                   </div>
                   <div>
                     <p className="text-gray-900 font-bold text-xs md:text-sm leading-none">New Booking!</p>
-                    <p className="text-gray-400 text-[10px] md:text-xs mt-1">Plumbing • Rs. 800/hr</p>
+                    <p className="text-gray-400 text-[10px] md:text-xs mt-1">Plumbing • Rs. 800/day</p>
                   </div>
                   <span className="ml-2 text-emerald-500 text-[10px] md:text-xs font-bold whitespace-nowrap">Just now</span>
                 </div>

@@ -25,7 +25,7 @@ export interface MyProfile {
   headline: string;
   bio: string;
   experienceYears: number;
-  ratePerHour: number;
+  dailyRate: number;
   availabilityStatus: 'available' | 'busy' | 'unavailable';
   city: string;
   region: string;
@@ -64,7 +64,7 @@ export interface HelperProfile {
   headline: string;
   bio: string;
   experienceYears: number;
-  ratePerHour: number;
+  dailyRate: number;
   availabilityStatus: 'available' | 'busy' | 'unavailable';
   city: string;
   region: string;
@@ -91,7 +91,7 @@ export interface RegisterHelperDto {
   headline: string;
   bio?: string;
   experienceYears: number;
-  ratePerHour: number;
+  dailyRate: number;
   cityId?: number;
   latitude?: number;
   longitude?: number;
@@ -99,6 +99,11 @@ export interface RegisterHelperDto {
   profilePicture?: File;
   cnicFront?: File;
   cnicBack?: File;
+}
+
+export interface HelperPricing {
+  dailyRate: number | null;
+  services: HelperService[];
 }
 
 export interface HelperSearchParams {

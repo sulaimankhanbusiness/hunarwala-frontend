@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Booking, BookingStatus } from '../types/booking.types';
+import { Booking, BookingStatus, BookingType } from '../types/booking.types';
 import { bookingApi } from '../api/booking.api';
 import { SimpleModal } from '@/components/SimpleModal';
 import {
@@ -20,7 +20,6 @@ interface BookingCardProps {
     viewMode?: 'grid' | 'list';
 }
 
-// Status config — colors, labels
 const STATUS_CONFIG: Record<string, { badge: string; border: string; avatarBg: string; avatarText: string }> = {
     [BookingStatus.PENDING]:     { badge: 'bg-amber-50 text-amber-700 border-amber-200',    border: 'border-l-amber-400',   avatarBg: 'bg-amber-50',   avatarText: 'text-amber-600'   },
     [BookingStatus.ACCEPTED]:    { badge: 'bg-indigo-50 text-indigo-700 border-indigo-200', border: 'border-l-indigo-400',  avatarBg: 'bg-indigo-50',  avatarText: 'text-indigo-600'  },
@@ -46,12 +45,6 @@ function StatusBadge({ status }: { status: BookingStatus }) {
 export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: BookingCardProps) => {
     const { addNotification } = useNotificationStore();
     const [loading, setLoading] = useState(false);
-    const [amount, setAmount] = useState(
-        (role === 'client' && booking.status === BookingStatus.COMPLETED)
-            ? (booking.helperReportedAmount?.toString() || booking.estimatedPrice.toString())
-            : booking.estimatedPrice.toString()
-    );
-    const [showAmountInput, setShowAmountInput] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean; title: string;
@@ -63,8 +56,12 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
     const cfg = STATUS_CONFIG[booking.status] ?? FALLBACK_CONFIG;
     const isTerminal = booking.status === BookingStatus.EXPIRED || booking.status === BookingStatus.CANCELLED;
 
-    const formattedDate = new Date(booking.scheduledAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' });
-    const formattedTime = new Date(booking.scheduledAt).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+    const formattedDate = booking.scheduledAt
+        ? new Date(booking.scheduledAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })
+        : '—';
+    const formattedTime = booking.scheduledAt
+        ? new Date(booking.scheduledAt).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
+        : '—';
 
     const counterpartName = role === 'client'
         ? (booking.helper?.user?.fullName || 'Awaiting Helper')
@@ -119,7 +116,6 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
         }
     };
 
-    // ── Primary action for the action button column ───────────────────────────
     const PrimaryAction = () => {
         if (loading) return <Loader2 className="w-4 h-4 animate-spin text-indigo-600 mx-auto" />;
 
@@ -155,22 +151,11 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
             );
         }
         if (role === 'helper' && booking.status === BookingStatus.IN_PROGRESS) {
-            return !showAmountInput ? (
-                <button onClick={() => setShowAmountInput(true)}
+            return (
+                <button onClick={() => handleAction(() => bookingApi.completeBooking(booking.id))}
                     className="w-full bg-violet-600 text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-violet-700 transition-colors flex items-center justify-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Mark Complete
                 </button>
-            ) : (
-                <div className="flex gap-1.5">
-                    <div className="flex-1 relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">Rs.</span>
-                        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
-                            className="w-full pl-7 pr-2 py-2 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-400" />
-                    </div>
-                    <button onClick={() => handleAction(() => bookingApi.completeBooking(booking.id, parseFloat(amount)))}
-                        className="bg-violet-600 text-white px-3 py-2 rounded-lg text-xs font-bold">Done</button>
-                    <button onClick={() => setShowAmountInput(false)} className="bg-gray-100 text-gray-500 px-2 py-2 rounded-lg text-xs">✕</button>
-                </div>
             );
         }
 
@@ -191,9 +176,9 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
             );
         }
         if (role === 'client' && booking.status === BookingStatus.COMPLETED) {
-            return !showAmountInput ? (
+            return (
                 <div className="flex gap-1.5">
-                    <button onClick={() => handleAction(() => bookingApi.settleBooking(booking.id, parseFloat(amount)))}
+                    <button onClick={() => handleAction(() => bookingApi.settleBooking(booking.id))}
                         className="flex-1 bg-emerald-600 text-white text-xs font-bold py-2 px-3 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Settle
                     </button>
@@ -201,15 +186,6 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
                         className="flex-1 bg-white text-orange-600 border border-orange-100 text-xs font-bold py-2 px-3 rounded-lg hover:bg-orange-50 transition-colors flex items-center justify-center gap-1">
                         <AlertCircle className="w-3.5 h-3.5" /> Dispute
                     </button>
-                </div>
-            ) : (
-                <div className="flex gap-1.5">
-                    <div className="flex-1 relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">Rs.</span>
-                        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
-                            className="w-full pl-7 pr-2 py-2 rounded-lg border border-indigo-200 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-400" />
-                    </div>
-                    <button onClick={() => setShowAmountInput(false)} className="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold">Done</button>
                 </div>
             );
         }
@@ -253,6 +229,12 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
         </>
     );
 
+    const priceDisplay = booking.price !== null && booking.price !== undefined
+        ? `Rs. ${Number(booking.price).toLocaleString('en-PK')}`
+        : '—';
+
+    const priceLabel = booking.bookingType === BookingType.SERVICE ? 'Service Price' : 'Daily Rate';
+
     // ── LIST VIEW ─────────────────────────────────────────────────────────────
     if (viewMode === 'list') {
         return (
@@ -265,7 +247,7 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
                             {counterpartInitial}
                         </div>
 
-                        {/* Name + service + category chip */}
+                        {/* Name + service */}
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-900 truncate">{counterpartName}</p>
                             <p className="text-[11px] text-gray-500 truncate">{booking.serviceDescription}</p>
@@ -284,10 +266,8 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
 
                         {/* Price */}
                         <div className="hidden sm:block flex-shrink-0 text-right min-w-[90px]">
-                            <p className="text-sm font-extrabold text-gray-900">
-                                Rs. {Number(booking.agreedAmount || booking.estimatedPrice).toLocaleString('en-PK')}
-                            </p>
-                            <p className="text-[9px] text-gray-400 uppercase font-bold">Total Payable</p>
+                            <p className="text-sm font-extrabold text-gray-900">{priceDisplay}</p>
+                            <p className="text-[9px] text-gray-400 uppercase font-bold">{priceLabel}</p>
                         </div>
 
                         {/* Status */}
@@ -325,7 +305,6 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
                         )}
                     </div>
 
-                    {/* Status-specific notices */}
                     {booking.status === BookingStatus.CANCELLED && booking.cancellationReason && (
                         <div className="mx-4 mb-3 bg-red-50 rounded-xl p-2.5 border border-red-100 flex items-start gap-2">
                             <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -408,12 +387,8 @@ export const BookingCard = ({ booking, role, onUpdate, viewMode = 'list' }: Book
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wide">
-                        {booking.status === BookingStatus.SETTLED || booking.status === BookingStatus.COMPLETED ? 'Final Amount' : 'Estimated'}
-                    </span>
-                    <span className="text-sm font-extrabold text-gray-900">
-                        Rs. {Number(booking.agreedAmount || booking.estimatedPrice).toLocaleString('en-PK')}
-                    </span>
+                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wide">{priceLabel}</span>
+                    <span className="text-sm font-extrabold text-gray-900">{priceDisplay}</span>
                 </div>
             </div>
 

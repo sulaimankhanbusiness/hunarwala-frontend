@@ -484,7 +484,7 @@ export default function MyProfilePage() {
                                 </h4>
                                 <div className="space-y-3 text-sm">
                                     {[
-                                        { label: 'Rate', value: `Rs. ${profile.ratePerHour.toLocaleString()}/hr` },
+                                        { label: 'Daily Rate', value: `Rs. ${profile.dailyRate.toLocaleString()}/day` },
                                         { label: 'Experience', value: `${profile.experienceYears}+ Years` },
                                         { label: 'Member Since', value: memberSince },
                                         { label: 'Service Area', value: `${profile.city}, ${profile.region}` },

@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import type { HelperProfile, HelperSearchParams, MyProfile, RegisterHelperDto } from '../types/helpers.types';
+import type { HelperProfile, HelperPricing, HelperSearchParams, MyProfile, RegisterHelperDto } from '../types/helpers.types';
 
 export const getHelpers = async (params: HelperSearchParams) => {
   return api.get('/users/search', { params }) as Promise<any>;
@@ -7,6 +7,14 @@ export const getHelpers = async (params: HelperSearchParams) => {
 
 export const getHelperProfile = async (id: string): Promise<HelperProfile> => {
   return api.get(`/users/profile?userId=${id}`) as Promise<HelperProfile>;
+};
+
+export const getHelperPricing = async (userId: string): Promise<HelperPricing> => {
+  return api.get(`/users/helper-pricing?userId=${userId}`) as Promise<HelperPricing>;
+};
+
+export const getHelperPricingByHelperId = async (helperId: string): Promise<HelperPricing> => {
+  return api.get(`/users/helper-pricing?helperId=${helperId}`) as Promise<HelperPricing>;
 };
 
 export const getMyProfile = async (): Promise<MyProfile> => {

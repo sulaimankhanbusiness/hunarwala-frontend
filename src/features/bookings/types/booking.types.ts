@@ -9,6 +9,11 @@ export enum BookingStatus {
     EXPIRED = 'EXPIRED',
 }
 
+export enum BookingType {
+    DAILY = 'DAILY',
+    SERVICE = 'SERVICE',
+}
+
 export enum CancelledBy {
     USER = 'USER',
     HELPER = 'HELPER',
@@ -31,19 +36,15 @@ export interface Booking {
     helperId: string;
     serviceDescription: string;
     scheduledAt: string;
-    estimatedPrice: number;
+    bookingType: BookingType;
+    serviceId?: string;
+    price: number | null;
     status: BookingStatus;
     startAt?: string;
     completedAt?: string;
     latitude?: number;
     longitude?: number;
     proofImageUrl?: string;
-    helperReportedAmount?: number;
-    userConfirmedPayment: boolean;
-    userConfirmedAt?: string;
-    helperConfirmedPayment: boolean;
-    helperConfirmedAt?: string;
-    agreedAmount?: number;
     isDisputed: boolean;
     disputeReason?: string;
     cancellationReason?: string;
@@ -74,12 +75,12 @@ export interface CreateBookingPayload {
     helperId: string;
     serviceDescription: string;
     scheduledAt: string;
-    estimatedPrice: number;
+    bookingType: BookingType;
+    serviceId?: string;
 }
 
 export interface CreateBroadcastPayload {
     helperIds: string[];
     serviceDescription: string;
     scheduledAt: string;
-    estimatedPrice: number;
 }

@@ -32,12 +32,12 @@ export const bookingApi = {
         return api.patch(`${BOOKING_BASE_URL}/${id}/start`, locationData || {});
     },
 
-    completeBooking: async (id: string, reportedAmount: number, proofImageUrl?: string): Promise<Booking> => {
-        return api.patch(`${BOOKING_BASE_URL}/${id}/complete`, { reportedAmount, proofImageUrl });
+    completeBooking: async (id: string, proofImageUrl?: string): Promise<Booking> => {
+        return api.patch(`${BOOKING_BASE_URL}/${id}/complete`, { proofImageUrl });
     },
 
-    settleBooking: async (id: string, agreedAmount?: number): Promise<Booking> => {
-        return api.patch(`${BOOKING_BASE_URL}/${id}/settle`, { agreedAmount });
+    settleBooking: async (id: string): Promise<Booking> => {
+        return api.patch(`${BOOKING_BASE_URL}/${id}/settle`, {});
     },
 
     disputeBooking: async (id: string, reason: string): Promise<Booking> => {

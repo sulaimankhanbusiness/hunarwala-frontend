@@ -104,10 +104,10 @@ export default function ProfessionalInfo({ onNext, onBack, initialData }: Profes
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
                         <DollarSign size={14} className="text-blue-500" />
-                        Hourly Rate (Rs.)
+                        Daily Rate (Rs.)
                     </label>
                     <input
-                        {...register('ratePerHour', {
+                        {...register('dailyRate', {
                             required: 'Rate is required',
                             valueAsNumber: true,
                             min: { value: 100, message: 'Minimum Rs. 100' }
@@ -116,7 +116,7 @@ export default function ProfessionalInfo({ onNext, onBack, initialData }: Profes
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                         placeholder="500"
                     />
-                    {errors.ratePerHour && <p className="text-red-500 text-[10px] mt-1 ml-1 font-medium">{errors.ratePerHour.message as string}</p>}
+                    {errors.dailyRate && <p className="text-red-500 text-[10px] mt-1 ml-1 font-medium">{errors.dailyRate.message as string}</p>}
                 </div>
             </div>
 

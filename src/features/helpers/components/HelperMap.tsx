@@ -182,7 +182,7 @@ export default function HelperMap({ helpers = [], userLocation, center = { lat: 
                                         <div className="flex justify-between items-center mb-3">
                                             <div>
                                                 <p className="text-[10px] text-gray-500 uppercase tracking-wider">Rate</p>
-                                                <p className="text-xs font-bold text-green-600">Rs. {helper.ratePerHour}/hr</p>
+                                                <p className="text-xs font-bold text-green-600">Rs. {helper.dailyRate}/day</p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] text-gray-500 uppercase tracking-wider">Rating</p>

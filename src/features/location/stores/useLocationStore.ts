@@ -24,7 +24,7 @@ interface LocationState {
     setSelectedRegion: (id: string) => void;
     setSelectedCity: (id: string) => void;
 
-    resolveLocationFromCity: (cityName: string) => Promise<void>;
+    resolveLocationFromCity: (cityName: string, location?: {countryName: string; countryCode: string; principalSubdivision: string}   ) => Promise<void>;
     reset: () => void;
 }
 
@@ -81,10 +81,10 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     setSelectedRegion: (id: string) => set({ selectedRegionId: id }),
     setSelectedCity: (id: string) => set({ selectedCityId: id }),
 
-    resolveLocationFromCity: async (cityName: string) => {
+    resolveLocationFromCity: async (cityName: string, location?: {countryName: string; countryCode: string; principalSubdivision: string} ) => {
         set({ isResolving: true });
         try {
-            const cityRes = await getCityByName(cityName);
+            const cityRes = await getCityByName(cityName,location?.countryName, location?.countryCode, location?.principalSubdivision);
             const cityData = cityRes.data || cityRes;
 
             if (cityData) {

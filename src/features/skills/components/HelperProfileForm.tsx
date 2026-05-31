@@ -20,7 +20,7 @@ export default function HelperProfileForm() {
         defaultValues: {
             headline: '',
             bio: '',
-            ratePerHour: '',
+            dailyRate: '',
             experienceYears: ''
         }
     });
@@ -81,10 +81,10 @@ export default function HelperProfileForm() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                                     <DollarSign size={16} className="text-blue-600" />
-                                    Hourly Rate (Rs)
+                                    Daily Rate (Rs)
                                 </label>
                                 <input
-                                    {...register('ratePerHour', { required: 'Rate is required' })}
+                                    {...register('dailyRate', { required: 'Rate is required' })}
                                     type="number"
                                     placeholder="1000"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"

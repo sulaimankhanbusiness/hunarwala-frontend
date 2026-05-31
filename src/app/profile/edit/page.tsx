@@ -109,7 +109,7 @@ export default function EditProfilePage() {
     // ── Form state ─────────────────────────────────────────────────────────
     const [basic, setBasic] = useState({
         fullName: '', phoneNumber: '', headline: '', bio: '',
-        experienceYears: '' as number | '', ratePerHour: '' as number | '',
+        experienceYears: '' as number | '', dailyRate: '' as number | '',
         availabilityStatus: 'available' as typeof STATUS_OPTIONS[number],
     });
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -133,7 +133,7 @@ export default function EditProfilePage() {
             headline: profile.headline ?? '',
             bio: profile.bio ?? '',
             experienceYears: profile.experienceYears ?? '',
-            ratePerHour: profile.ratePerHour ?? '',
+            dailyRate: profile.dailyRate ?? '',
             availabilityStatus: profile.availabilityStatus ?? 'available',
         });
         setLanguages(profile.languages ?? []);
@@ -249,7 +249,7 @@ export default function EditProfilePage() {
             fd.append('headline', basic.headline);
             fd.append('bio', basic.bio);
             if (basic.experienceYears !== '') fd.append('experienceYears', String(basic.experienceYears));
-            if (basic.ratePerHour !== '') fd.append('ratePerHour', String(basic.ratePerHour));
+            if (basic.dailyRate !== '') fd.append('dailyRate', String(basic.dailyRate));
             fd.append('availabilityStatus', basic.availabilityStatus);
 
             // Profile picture
@@ -391,7 +391,7 @@ export default function EditProfilePage() {
                                 <input className={inputCls} type="number" min={0} max={50} value={basic.experienceYears} onChange={e => setBasic(p => ({ ...p, experienceYears: e.target.value === '' ? '' : Number(e.target.value) }))} placeholder="e.g. 5" />
                             </Field>
                             <Field label="Rate per Hour (PKR)">
-                                <input className={inputCls} type="number" min={0} value={basic.ratePerHour} onChange={e => setBasic(p => ({ ...p, ratePerHour: e.target.value === '' ? '' : Number(e.target.value) }))} placeholder="e.g. 1500" />
+                                <input className={inputCls} type="number" min={0} value={basic.dailyRate} onChange={e => setBasic(p => ({ ...p, dailyRate: e.target.value === '' ? '' : Number(e.target.value) }))} placeholder="e.g. 1500" />
                             </Field>
                             <Field label="Bio" hint="Tell clients about yourself">
                                 <textarea className={`${inputCls} resize-none sm:col-span-2`} rows={4} value={basic.bio} onChange={e => setBasic(p => ({ ...p, bio: e.target.value }))} placeholder="Describe your experience and skills..." />

@@ -286,7 +286,7 @@ function RegisterPhone() {
         <div className="h-1.5 w-16 bg-indigo-200 rounded" />
       </div>
       <div className="px-3 mt-3 space-y-2">
-        {['Skill','Experience','Rate/hr','City'].map((_, i) => (
+        {['Skill','Experience','Rate/day','City'].map((_, i) => (
           <div key={i} className="flex items-center gap-2">
             <div className="h-1.5 w-10 bg-gray-300 rounded flex-shrink-0" />
             <div className={`flex-1 h-6 rounded-lg border ${i === 1 ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 bg-gray-50'}`} />

@@ -513,8 +513,8 @@ export default function HelperProfile() {
                                 <div className="mb-5">
                                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Starting From</span>
                                     <div className="flex items-end gap-1 mt-1">
-                                        <span className="text-3xl font-black text-indigo-600">Rs. {helper.ratePerHour.toLocaleString()}</span>
-                                        <span className="text-gray-400 font-medium mb-0.5 text-sm">/hr</span>
+                                        <span className="text-3xl font-black text-indigo-600">Rs. {helper.dailyRate.toLocaleString()}</span>
+                                        <span className="text-gray-400 font-medium mb-0.5 text-sm">/day</span>
                                     </div>
                                 </div>
 
@@ -590,7 +590,7 @@ export default function HelperProfile() {
                                         { label: 'Completion', value: `${helper.completionRate}%` },
                                         { label: 'Member Since', value: memberSince },
                                         { label: 'Service Area', value: `${helper.city}, ${helper.region}` },
-                                        { label: 'Rate', value: `Rs. ${helper.ratePerHour.toLocaleString()}/hr` },
+                                        { label: 'Daily Rate', value: `Rs. ${helper.dailyRate.toLocaleString()}/day` },
                                     ].map(({ label, value }) => (
                                         <div key={label} className="flex justify-between items-center border-b border-gray-50 pb-3 last:border-0 last:pb-0">
                                             <span className="text-gray-400">{label}</span>
@@ -664,6 +664,7 @@ export default function HelperProfile() {
             <SimpleModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} title="Schedule Service">
                 <BookingForm
                     helperId={helper.id}
+                    helperUserId={helper.userId}
                     helperName={helper.fullName}
                     onSuccess={() => { setIsBookingModalOpen(false); router.push('/bookings'); }}
                     onCancel={() => setIsBookingModalOpen(false)}

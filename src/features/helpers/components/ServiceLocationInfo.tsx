@@ -71,7 +71,7 @@ export default function ServiceLocationInfo({ onSubmit, onBack, isLoading: isSub
         try {
             const geoData = await reverseGeocode(lat, lng);
             if (geoData && geoData.city) {
-                await resolveLocationFromCity(geoData.city);
+                await resolveLocationFromCity(geoData.city, { countryName: geoData.countryName, countryCode: geoData.countryCode, principalSubdivision: geoData.principalSubdivision });
                 setCoords({ lat, lng });
                 setMapCenter({ lat, lng });
             }
