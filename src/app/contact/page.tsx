@@ -9,7 +9,7 @@ import {
   Loader2, Headphones, ArrowRight,
 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
-import { contactApi, ContactSubject, type ContactInfo, type SocialLink, type BusinessHour } from '@/features/contact/contact.api';
+import { contactApi, ContactSubject, type ContactInfo, type SocialLink, type BusinessHour } from '@/features/contact/api/contact.api';
 import { toast } from 'sonner';
 
 // ── Icon maps ─────────────────────────────────────────────────────────────────

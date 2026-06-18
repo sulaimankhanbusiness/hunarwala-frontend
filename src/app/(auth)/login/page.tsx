@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   useEffect(() => {
     if (_hasHydrated && isAuthenticated) {
@@ -26,12 +27,18 @@ export default function LoginPage() {
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     setError('');
+    setUnverifiedEmail('');
     try {
       const response = await login(data);
       setAuth(response.user, response.accessToken);
       router.push('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      const msg = err.response?.data?.message;
+      if (msg === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(data.email);
+      } else {
+        setError(msg || 'Invalid email or password');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +70,20 @@ export default function LoginPage() {
           {error && (
             <div className="mb-5 p-3.5 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl font-medium">
               {error}
+            </div>
+          )}
+
+          {unverifiedEmail && (
+            <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-amber-800 text-sm font-semibold mb-2">
+                Your email address is not verified yet.
+              </p>
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
+                className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+              >
+                Verify my email →
+              </Link>
             </div>
           )}
 

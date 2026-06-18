@@ -12,6 +12,14 @@ export const getMe = async () => {
   return api.get('/auth/me') as Promise<any>;
 };
 
+export const verifyEmail = async (email: string, otp: string) => {
+  return api.post('/auth/verify-email', { email, otp }) as Promise<any>;
+};
+
+export const resendOtp = async (email: string) => {
+  return api.post('/auth/resend-otp', { email }) as Promise<{ message: string }>;
+};
+
 export const forgotPassword = async (email: string) => {
   return api.post('/auth/forgot-password', { email }) as Promise<{ message: string }>;
 };

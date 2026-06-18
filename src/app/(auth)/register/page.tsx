@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { register as registerApi } from '@/features/auth/services/auth.service';
-import { registerAsHelper } from '@/features/helpers/services/helper.service';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
+import { usePendingHelperStore } from '@/features/auth/stores/usePendingHelperStore';
 import { useState, useEffect, Suspense } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, User, Briefcase, MapPin, FileImage } from 'lucide-react';
 import ProfessionalInfo from '@/features/helpers/components/ProfessionalInfo';
@@ -17,7 +17,8 @@ type Step = 'account' | 'professional' | 'location' | 'documents';
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setAuth, isAuthenticated, _hasHydrated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
+  const { setPendingHelperData } = usePendingHelperStore();
 
   useEffect(() => {
     if (_hasHydrated && isAuthenticated) {
@@ -51,9 +52,8 @@ function RegisterForm() {
       setIsLoading(true);
       setError('');
       try {
-        const res = await registerApi({ ...data, userType });
-        setAuth(res.user, res.accessToken);
-        router.push('/');
+        await registerApi({ ...data, userType });
+        router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Registration failed. Please try again.');
       } finally {
@@ -76,10 +76,10 @@ function RegisterForm() {
     setIsLoading(true);
     setError('');
     try {
-      const authRes = await registerApi(accountData);
-      setAuth(authRes.user, authRes.accessToken);
-      await registerAsHelper({ userId: authRes.user.id, ...professionalData, ...locationData, ...docsData });
-      router.push('/');
+      // Save helper profile data — completed after email verification
+      setPendingHelperData({ professionalData, locationData, docsData });
+      await registerApi(accountData);
+      router.push(`/verify-email?email=${encodeURIComponent(accountData.email)}`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
