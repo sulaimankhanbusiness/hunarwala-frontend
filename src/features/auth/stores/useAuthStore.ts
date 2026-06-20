@@ -6,6 +6,7 @@ interface User {
   email: string;
   fullName: string;
   userType: 'client' | 'helper' | 'admin';
+  helperId?: string | null;
   profileImage?: string;
 }
 
@@ -15,13 +16,14 @@ interface AuthState {
   isAuthenticated: boolean;
   _hasHydrated: boolean;
   setAuth: (user: User, token: string) => void;
+  updateUser: (partial: Partial<User>) => void;
   logout: () => void;
   setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -29,6 +31,11 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (user, token) => {
         if (typeof window !== 'undefined') localStorage.setItem('token', token);
         set({ user, token, isAuthenticated: true });
+      },
+      updateUser: (partial) => {
+        const current = get().user;
+        if (!current) return;
+        set({ user: { ...current, ...partial } });
       },
       logout: () => {
         if (typeof window !== 'undefined') localStorage.removeItem('token');

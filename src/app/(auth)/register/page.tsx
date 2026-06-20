@@ -8,6 +8,7 @@ import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { usePendingHelperStore } from '@/features/auth/stores/usePendingHelperStore';
 import { useState, useEffect, Suspense } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, User, Briefcase, MapPin, FileImage } from 'lucide-react';
+import { GoogleAuthButton } from '@/components/GoogleAuthButton';
 import ProfessionalInfo from '@/features/helpers/components/ProfessionalInfo';
 import ServiceLocationInfo from '@/features/helpers/components/ServiceLocationInfo';
 import DocumentsInfo from '@/features/helpers/components/DocumentsInfo';
@@ -20,11 +21,12 @@ function RegisterForm() {
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { setPendingHelperData } = usePendingHelperStore();
 
+  // Only redirect if already authenticated when the page loaded.
+  // Watching isAuthenticated would race with GoogleAuthButton's own redirect.
   useEffect(() => {
-    if (_hasHydrated && isAuthenticated) {
-      router.replace('/');
-    }
-  }, [_hasHydrated, isAuthenticated, router]);
+    if (_hasHydrated && isAuthenticated) router.replace('/');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_hasHydrated]);
 
   const [step, setStep] = useState<Step>('account');
   const [isLoading, setIsLoading] = useState(false);
@@ -267,6 +269,15 @@ function RegisterForm() {
                   {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Continue'}
                 </button>
               </form>
+
+              <div className="flex items-center gap-3 mt-5">
+                <div className="flex-1 h-px bg-gray-100" />
+                <span className="text-xs text-gray-400 font-medium">or</span>
+                <div className="flex-1 h-px bg-gray-100" />
+              </div>
+              <div className="mt-4">
+                <GoogleAuthButton label="Sign up with Google" />
+              </div>
             </>
           )}
 

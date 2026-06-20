@@ -12,6 +12,7 @@ import Footer from "@/components/layout/Footer";
 import { AuthRouteWatcher } from "@/components/providers/AuthRouteWatcher";
 import { SocketProvider } from "@/components/providers/SocketProvider";
 import { NotificationsProvider } from "@/components/providers/NotificationsProvider";
+import { GoogleProvider } from "@/components/providers/GoogleProvider";
 import SupportButton from "@/components/SupportButton";
 
 const geistSans = Geist({
@@ -207,6 +208,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
       >
+        <GoogleProvider>
         <QueryProvider>
           <ToasterProvider />
           <AuthRouteWatcher>
@@ -237,6 +239,7 @@ export default function RootLayout({
             </SocketProvider>
           </AuthRouteWatcher>
         </QueryProvider>
+        </GoogleProvider>
       </body>
     </html>
   );

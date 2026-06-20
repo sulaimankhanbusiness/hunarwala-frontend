@@ -27,3 +27,11 @@ export const forgotPassword = async (email: string) => {
 export const resetPassword = async (token: string, newPassword: string) => {
   return api.post('/auth/reset-password', { token, newPassword }) as Promise<{ message: string }>;
 };
+
+export const googleAuth = async (accessToken: string) => {
+  return api.post('/auth/google', { accessToken }) as Promise<any>;
+};
+
+export const refreshToken = async () => {
+  return api.post('/auth/refresh-token') as Promise<{ accessToken: string; user: any }>;
+};

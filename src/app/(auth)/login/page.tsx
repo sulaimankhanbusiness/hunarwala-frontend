@@ -7,6 +7,7 @@ import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { login } from '@/features/auth/services/auth.service';
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Loader2, Shield, Star, Users } from 'lucide-react';
+import { GoogleAuthButton } from '@/components/GoogleAuthButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,11 +17,12 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
+  // Only redirect if already authenticated when the page loaded.
+  // Watching isAuthenticated would race with GoogleAuthButton's own redirect.
   useEffect(() => {
-    if (_hasHydrated && isAuthenticated) {
-      router.replace('/');
-    }
-  }, [_hasHydrated, isAuthenticated, router]);
+    if (_hasHydrated && isAuthenticated) router.replace('/');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_hasHydrated]);
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -143,6 +145,14 @@ export default function LoginPage() {
               {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Sign In'}
             </button>
           </form>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-gray-100" />
+            <span className="text-xs text-gray-400 font-medium">or</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+
+          <GoogleAuthButton label="Continue with Google" />
 
           <div className="mt-6 text-center text-sm text-gray-500">
             Don't have an account?{' '}
