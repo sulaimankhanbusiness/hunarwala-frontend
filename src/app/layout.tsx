@@ -51,7 +51,8 @@ function buildCategoryKeywords(categoryNames: string[]): string[] {
 
 async function fetchCategories(): Promise<string[]> {
   try {
-    const res = await fetch('https://api.hunarwalaa.com/skills/categories', {
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? 'https://api.hunarwalaa.com').replace(/\/api$/i, '');
+    const res = await fetch(`${apiBase}/skills/categories`, {
       next: { revalidate: 3600 }, // re-fetch every 1 hour
     });
     if (!res.ok) return STATIC_FALLBACK_KEYWORDS;
