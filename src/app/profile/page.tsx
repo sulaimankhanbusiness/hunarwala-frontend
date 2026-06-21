@@ -233,7 +233,7 @@ export default function MyProfilePage() {
                         {/* Profile actions */}
                         <div className="flex-shrink-0 self-end pb-1 flex items-center gap-2 mt-4">
                             <ShareButton
-                                url={`${typeof window !== 'undefined' ? window.location.origin : 'https://hunarwalaa.com'}/helper/${profile.userId}`}
+                                url={`${typeof window !== 'undefined' ? window.location.origin : 'https://hunarwalaa.com'}/helper/${profile.id}`}
                                 title={`${profile.fullName} — ${profile.headline ?? 'Professional'} on HunarWalaa`}
                                 text={`Check out ${profile.fullName}'s profile on HunarWalaa — ${profile.city} professional.`}
                             />
