@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { ShareButton } from '@/components/ShareButton';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { getMyProfile } from '@/features/helpers/services/helpers.service';
 import type { HelperService, PortfolioItem } from '@/features/helpers/types/helpers.types';
@@ -137,6 +138,7 @@ export default function MyProfilePage() {
 
     const sortedPortfolio = [...profile.portfolio].sort((a, b) => a.sortOrder - b.sortOrder);
 
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -228,8 +230,13 @@ export default function MyProfilePage() {
                             </div>
                         </div>
 
-                        {/* Edit Profile button */}
-                        <div className="flex-shrink-0 self-end pb-1">
+                        {/* Profile actions */}
+                        <div className="flex-shrink-0 self-end pb-1 flex items-center gap-2 mt-4">
+                            <ShareButton
+                                url={`${typeof window !== 'undefined' ? window.location.origin : 'https://hunarwalaa.com'}/helper/${profile.userId}`}
+                                title={`${profile.fullName} — ${profile.headline ?? 'Professional'} on HunarWalaa`}
+                                text={`Check out ${profile.fullName}'s profile on HunarWalaa — ${profile.city} professional.`}
+                            />
                             <Link
                                 href="/profile/edit"
                                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all hover:-translate-y-0.5 active:scale-[0.98]"
