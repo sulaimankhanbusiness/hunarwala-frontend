@@ -9,6 +9,7 @@ import { usePendingHelperStore } from '@/features/auth/stores/usePendingHelperSt
 import { useState, useEffect, Suspense } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, User, Briefcase, MapPin, FileImage } from 'lucide-react';
 import { GoogleAuthButton } from '@/components/GoogleAuthButton';
+import { fbEvent } from '@/lib/pixel';
 import ProfessionalInfo from '@/features/helpers/components/ProfessionalInfo';
 import ServiceLocationInfo from '@/features/helpers/components/ServiceLocationInfo';
 import DocumentsInfo from '@/features/helpers/components/DocumentsInfo';
@@ -55,6 +56,7 @@ function RegisterForm() {
       setError('');
       try {
         await registerApi({ ...data, userType });
+        fbEvent('CompleteRegistration', { content_name: userType });
         router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -81,6 +83,7 @@ function RegisterForm() {
       // Save helper profile data — completed after email verification
       setPendingHelperData({ professionalData, locationData, docsData });
       await registerApi(accountData);
+      fbEvent('CompleteRegistration', { content_name: 'helper' });
       router.push(`/verify-email?email=${encodeURIComponent(accountData.email)}`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');

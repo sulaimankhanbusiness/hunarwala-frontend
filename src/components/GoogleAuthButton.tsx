@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { googleAuth } from '@/features/auth/services/auth.service';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
+import { fbEvent } from '@/lib/pixel';
 import { useRouter } from 'next/navigation';
 
 export function GoogleAuthButton({ label = 'Continue with Google' }: { label?: string }) {
@@ -20,7 +21,7 @@ export function GoogleAuthButton({ label = 'Continue with Google' }: { label?: s
       try {
         const response = await googleAuth(tokenResponse.access_token);
         setAuth(response.user, response.accessToken);
-        // New users pick their role; returning users go straight home
+        if (response.isNewUser) fbEvent('CompleteRegistration', { content_name: 'google' });
         router.replace(response.isNewUser ? '/choose-role' : '/');
       } catch (err: any) {
         setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');

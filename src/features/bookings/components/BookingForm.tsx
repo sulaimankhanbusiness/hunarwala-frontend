@@ -7,6 +7,7 @@ import { getHelperPricing, getHelperPricingByHelperId } from '@/features/helpers
 import type { HelperService, HelperPricing } from '@/features/helpers/types/helpers.types';
 import { Calendar, Clock, PenTool, Loader2, Briefcase, Clock3 } from 'lucide-react';
 import { toast } from 'sonner';
+import { fbEvent } from '@/lib/pixel';
 
 interface BookingFormProps {
     helperId?: string;
@@ -97,6 +98,7 @@ export const BookingForm = ({ helperId, helperUserId, helperIds, helperName, onS
                 throw new Error('No helpers selected for booking');
             }
 
+            fbEvent('Lead', { content_name: helperName, value: pricePreview ?? 0, currency: 'PKR' });
             toast.success(isBroadcast
                 ? `Broadcast sent to ${helperIds!.length} professional${helperIds!.length > 1 ? 's' : ''}!`
                 : 'Booking request sent!');

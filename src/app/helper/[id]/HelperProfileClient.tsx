@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -19,6 +19,7 @@ import { chatApi } from '@/features/chat/api/chat.api';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { SimpleModal } from '@/components/SimpleModal';
 import { BookingForm } from '@/features/bookings/components/BookingForm';
+import { fbEvent } from '@/lib/pixel';
 import { getMediaUrl } from '@/utils/url';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -112,10 +113,16 @@ export default function HelperProfileClient({ id, initialHelper }: Props) {
 
     const { isAuthenticated } = useAuthStore();
 
+    useEffect(() => {
+        if (helper) fbEvent('ViewContent', { content_name: helper.fullName, content_type: 'helper_profile' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [helper?.userId]);
+
     const handleChatNow = async () => {
         if (!isAuthenticated) { router.push('/login'); return; }
         try {
             const chat = await chatApi.createChat(helper?.userId as string);
+            fbEvent('Contact');
             router.push(`/chats?chatId=${chat.id}`);
         } catch {
             toast.error('Could not start chat. Please try again.');

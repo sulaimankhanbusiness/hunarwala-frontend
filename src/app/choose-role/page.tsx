@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2, Briefcase, User, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
+import { fbEvent } from '@/lib/pixel';
 
 type Role = 'client' | 'helper';
 
@@ -23,6 +24,8 @@ export default function ChooseRolePage() {
   }, [_hasHydrated]);
 
   const onContinue = () => {
+    if (!selected) return;
+    fbEvent('CompleteRegistration', { content_name: selected });
     if (selected === 'helper') {
       router.push('/complete-helper-profile');
     } else {
