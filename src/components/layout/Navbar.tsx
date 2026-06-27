@@ -30,7 +30,8 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
 
           {/* Logo */}
-          <Link href="/" className="leading-none group">
+          <Link href="/" className="leading-none group flex items-center gap-2">
+            <img src="/logo.png" alt="logo" className="h-14 w-14 object-contain" />
             <span className="text-2xl font-bold text-indigo-600 tracking-tighter group-hover:text-indigo-700 transition-colors">
               HunarWalaa<span className="text-amber-500">.</span>
             </span>
