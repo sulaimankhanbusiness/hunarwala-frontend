@@ -84,3 +84,11 @@ export interface CreateBroadcastPayload {
     serviceDescription: string;
     scheduledAt: string;
 }
+
+export interface PaginatedBookings {
+    items: Booking[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}

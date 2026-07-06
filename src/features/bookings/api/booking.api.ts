@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import type { Booking, CreateBookingPayload, CreateBroadcastPayload } from '../types/booking.types';
+import type { Booking, BookingStatus, CreateBookingPayload, CreateBroadcastPayload, PaginatedBookings } from '../types/booking.types';
 
 const BOOKING_BASE_URL = '/bookings';
 
@@ -12,8 +12,13 @@ export const bookingApi = {
         return api.post(`${BOOKING_BASE_URL}/broadcast`, payload);
     },
 
-    getMyBookings: async (type?: string): Promise<Booking[]> => {
-        return api.get(`${BOOKING_BASE_URL}/my`, { params: { type } });
+    getMyBookings: async (
+        type: 'client' | 'helper',
+        page = 1,
+        limit = 10,
+        status?: BookingStatus,
+    ): Promise<PaginatedBookings> => {
+        return api.get(`${BOOKING_BASE_URL}/my`, { params: { type, page, limit, status } });
     },
 
     getBookingById: async (id: string): Promise<Booking> => {

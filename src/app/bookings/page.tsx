@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/features/auth/stores/useAuthStore';
 import { useBookings } from '@/features/bookings/hooks/useBookings';
 import { BookingCard } from '@/features/bookings/components/BookingCard';
@@ -37,35 +37,66 @@ export default function MyBookingsPage() {
   const [activeTab,   setActiveTab]   = useState<'client' | 'helper'>('client');
   const [viewMode,    setViewMode]    = useState<'grid' | 'list'>('list');
   const [search,      setSearch]      = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
   const clearBookings = useNavBadgeStore((s) => s.clearBookings);
 
-  const { data: clientBookings = [], isLoading: loadingClient, refetch: refetchClient } = useBookings('client');
-  const { data: helperBookings = [], isLoading: loadingHelper, refetch: refetchHelper } = useBookings('helper');
+  const statusParam = statusFilter || undefined;
 
-  const bookings  = activeTab === 'client' ? clientBookings : helperBookings;
-  const isLoading = activeTab === 'client' ? loadingClient : loadingHelper;
-  const refetch   = activeTab === 'client' ? refetchClient : refetchHelper;
+  const {
+    data: clientPages, isLoading: loadingClient, refetch: refetchClient,
+    fetchNextPage: fetchNextClient, hasNextPage: hasNextClient, isFetchingNextPage: fetchingNextClient,
+  } = useBookings('client', statusParam);
+  const {
+    data: helperPages, isLoading: loadingHelper, refetch: refetchHelper,
+    fetchNextPage: fetchNextHelper, hasNextPage: hasNextHelper, isFetchingNextPage: fetchingNextHelper,
+  } = useBookings('helper', statusParam);
+
+  const clientBookings = useMemo(() => clientPages?.pages.flatMap((p) => p.items) ?? [], [clientPages]);
+  const helperBookings = useMemo(() => helperPages?.pages.flatMap((p) => p.items) ?? [], [helperPages]);
+  // "total" reflects the current status filter (server-side), not the grand total across all statuses.
+  const clientTotal = clientPages?.pages[0]?.total ?? 0;
+  const helperTotal = helperPages?.pages[0]?.total ?? 0;
+
+  const bookings           = activeTab === 'client' ? clientBookings : helperBookings;
+  const isLoading          = activeTab === 'client' ? loadingClient : loadingHelper;
+  const refetch            = activeTab === 'client' ? refetchClient : refetchHelper;
+  const fetchNextPage      = activeTab === 'client' ? fetchNextClient : fetchNextHelper;
+  const hasNextPage        = activeTab === 'client' ? hasNextClient : hasNextHelper;
+  const isFetchingNextPage = activeTab === 'client' ? fetchingNextClient : fetchingNextHelper;
+  const total              = activeTab === 'client' ? clientTotal : helperTotal;
 
   useEffect(() => { clearBookings(); }, [clearBookings]);
   useEffect(() => {
     if (user?.userType === 'helper') setActiveTab('helper');
   }, [user]);
 
+  // Status filtering happens server-side (see useBookings). Free-text search only matches
+  // bookings already loaded on-screen — same tradeoff the chat list search already uses —
+  // so scroll/load more first if you're searching for something older.
   const filtered = useMemo(() => {
-    let list = bookings;
-    if (statusFilter) list = list.filter((b) => b.status === statusFilter);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter((b) =>
-        b.serviceDescription?.toLowerCase().includes(q) ||
-        (activeTab === 'client'
-          ? b.helper?.user?.fullName?.toLowerCase().includes(q)
-          : b.user?.fullName?.toLowerCase().includes(q))
-      );
-    }
-    return list;
-  }, [bookings, search, statusFilter, activeTab]);
+    if (!search.trim()) return bookings;
+    const q = search.toLowerCase();
+    return bookings.filter((b) =>
+      b.serviceDescription?.toLowerCase().includes(q) ||
+      (activeTab === 'client'
+        ? b.helper?.user?.fullName?.toLowerCase().includes(q)
+        : b.user?.fullName?.toLowerCase().includes(q))
+    );
+  }, [bookings, search, activeTab]);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (!isAuthenticated) {
     return (
@@ -125,11 +156,11 @@ export default function MyBookingsPage() {
               >
                 <UserIcon className="w-4 h-4" />
                 As Client
-                {clientBookings.length > 0 && (
+                {clientTotal > 0 && (
                   <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
                     activeTab === 'client' ? 'bg-white/25 text-white' : 'bg-indigo-100 text-indigo-600'
                   }`}>
-                    {clientBookings.length}
+                    {clientTotal}
                   </span>
                 )}
               </button>
@@ -144,11 +175,11 @@ export default function MyBookingsPage() {
                 >
                   <Briefcase className="w-4 h-4" />
                   As Helper
-                  {helperBookings.length > 0 && (
+                  {helperTotal > 0 && (
                     <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
                       activeTab === 'helper' ? 'bg-white/25 text-white' : 'bg-indigo-100 text-indigo-600'
                     }`}>
-                      {helperBookings.length}
+                      {helperTotal}
                     </span>
                   )}
                 </button>
@@ -171,7 +202,7 @@ export default function MyBookingsPage() {
           <div className="relative">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value as BookingStatus | '')}
               className="appearance-none pl-4 pr-9 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all cursor-pointer"
             >
               {STATUS_OPTIONS.map((o) => (
@@ -204,8 +235,18 @@ export default function MyBookingsPage() {
                 />
               ))}
             </div>
+            <div ref={observerTarget} className="h-4" />
+            {isFetchingNextPage && (
+              <div className="flex justify-center py-3">
+                <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
+              </div>
+            )}
             <p className="text-xs text-gray-400 mt-4 text-center">
-              Showing {filtered.length} of {bookings.length} bookings
+              {search.trim()
+                ? `Showing ${filtered.length} matching "${search}" out of ${bookings.length} loaded (${total} total)`
+                : hasNextPage
+                  ? `Showing ${bookings.length} of ${total} bookings — scroll for more`
+                  : `Showing all ${total} bookings`}
             </p>
           </>
 
