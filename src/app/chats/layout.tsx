@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   alternates: { canonical: 'https://hunarwalaa.com/chats' },
+  robots: { index: false, follow: true },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

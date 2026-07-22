@@ -28,18 +28,18 @@ export const metadata: Metadata = {
     'home maintenance Pakistan',
   ],
   alternates: {
-    canonical: 'https://hunarwala.com/services',
+    canonical: 'https://hunarwalaa.com/services',
   },
   openGraph: {
     type: 'website',
-    url: 'https://hunarwala.com/services',
+    url: 'https://hunarwalaa.com/services',
     title: 'Home Services in Pakistan | HunarWalaa',
     description:
       'Book verified plumbers, electricians, cleaners & 20+ skilled professionals across Pakistan. Transparent pricing. Same-day availability.',
     siteName: 'HunarWalaa',
     images: [
       {
-        url: 'https://hunarwala.com/og-services.png',
+        url: 'https://hunarwalaa.com/og-services.png',
         width: 1200,
         height: 630,
         alt: 'HunarWalaa – Hire skilled home-service professionals across Pakistan',
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     title: 'Home Services in Pakistan | HunarWalaa',
     description:
       'Book trusted plumbers, electricians, cleaners & more across Pakistan. Verified pros, transparent prices.',
-    images: ['https://hunarwala.com/og-services.png'],
+    images: ['https://hunarwalaa.com/og-services.png'],
   },
   robots: {
     index: true,
@@ -67,26 +67,26 @@ const jsonLd = {
   '@graph': [
     {
       '@type': 'WebPage',
-      '@id': 'https://hunarwala.com/services',
-      url: 'https://hunarwala.com/services',
+      '@id': 'https://hunarwalaa.com/services',
+      url: 'https://hunarwalaa.com/services',
       name: 'Home Services in Pakistan | HunarWalaa',
       description:
         'Book verified plumbers, electricians, cleaners, carpenters, AC technicians & 20+ skilled professionals across Pakistan.',
       inLanguage: 'en-PK',
-      isPartOf: { '@id': 'https://hunarwala.com' },
+      isPartOf: { '@id': 'https://hunarwalaa.com' },
       breadcrumb: {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://hunarwala.com' },
-          { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://hunarwala.com/services' },
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://hunarwalaa.com' },
+          { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://hunarwalaa.com/services' },
         ],
       },
     },
     {
       '@type': 'Organization',
-      '@id': 'https://hunarwala.com/#organization',
+      '@id': 'https://hunarwalaa.com/#organization',
       name: 'HunarWalaa',
-      url: 'https://hunarwala.com',
+      url: 'https://hunarwalaa.com',
       description: "Pakistan's trusted marketplace for home services and skilled professionals.",
       areaServed: { '@type': 'Country', name: 'Pakistan' },
     },
@@ -94,11 +94,11 @@ const jsonLd = {
       '@type': 'ItemList',
       name: 'Popular Home Services',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Plumbing', url: 'https://hunarwala.com/?skill=Plumbing#search' },
-        { '@type': 'ListItem', position: 2, name: 'Electrical Work', url: 'https://hunarwala.com/?skill=Electrical+Work#search' },
-        { '@type': 'ListItem', position: 3, name: 'Home Cleaning', url: 'https://hunarwala.com/?skill=Home+Cleaning#search' },
-        { '@type': 'ListItem', position: 4, name: 'AC & HVAC', url: 'https://hunarwala.com/?skill=AC+%26+HVAC#search' },
-        { '@type': 'ListItem', position: 5, name: 'Carpentry', url: 'https://hunarwala.com/?skill=Carpentry#search' },
+        { '@type': 'ListItem', position: 1, name: 'Plumbing', url: 'https://hunarwalaa.com/?skill=Plumbing#search' },
+        { '@type': 'ListItem', position: 2, name: 'Electrical Work', url: 'https://hunarwalaa.com/?skill=Electrical+Work#search' },
+        { '@type': 'ListItem', position: 3, name: 'Home Cleaning', url: 'https://hunarwalaa.com/?skill=Home+Cleaning#search' },
+        { '@type': 'ListItem', position: 4, name: 'AC & HVAC', url: 'https://hunarwalaa.com/?skill=AC+%26+HVAC#search' },
+        { '@type': 'ListItem', position: 5, name: 'Carpentry', url: 'https://hunarwalaa.com/?skill=Carpentry#search' },
       ],
     },
   ],

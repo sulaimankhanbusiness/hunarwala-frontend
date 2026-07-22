@@ -1232,9 +1232,9 @@ function SplashScreen() {
           </div>
         </div>
 
-        <h1 className="text-white font-extrabold text-3xl tracking-tight mb-1">
+        <div className="text-white font-extrabold text-3xl tracking-tight mb-1">
           HunarWalaa<span className="text-amber-300">.</span>
-        </h1>
+        </div>
         <p className="text-indigo-200 text-[12px] text-center mb-8">
           Pakistan&apos;s trusted service marketplace
         </p>

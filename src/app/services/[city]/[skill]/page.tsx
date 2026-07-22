@@ -37,12 +37,16 @@ export async function generateMetadata({
   const skillData = SKILLS.find((s) => s.slug === skill);
   if (!cityName || !skillData) return { title: 'Not Found' };
 
+  const helpers = await fetchHelpersBySkill(cityName, skillData.apiName);
+
   const title = `${skillData.name} in ${cityName} | HunarWalaa — Verified Professionals`;
   const description = `Hire verified ${skillData.name.toLowerCase()} in ${cityName}. ${skillData.description}. Book on HunarWalaa — Pakistan's trusted service marketplace.`;
 
   return {
     title,
     description,
+    // No live listings yet — keep this variant out of the index until it has real, unique content.
+    ...(helpers.length === 0 && { robots: { index: false, follow: true } }),
     keywords: [
       `${skillData.name.toLowerCase()} in ${cityName}`,
       `hire ${skillData.name.toLowerCase()} ${cityName}`,
@@ -278,7 +282,7 @@ export default async function CitySkillPage({
                   href={`/services/${city}/${s.slug}`}
                   className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600 text-sm font-medium px-4 py-2 rounded-full transition-all"
                 >
-                  {s.icon} {s.name}
+                  {s.icon} {s.name} in {cityName}
                 </Link>
               ))}
             </div>

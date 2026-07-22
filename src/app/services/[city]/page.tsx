@@ -138,8 +138,11 @@ export default async function CityPage({
                   href={`/services/${city}/${svc.slug}`}
                   className="flex flex-col items-center gap-2 bg-white border border-gray-100 rounded-2xl p-4 hover:border-indigo-200 hover:shadow-md transition-all text-center group"
                 >
-                  <span className="text-3xl">{svc.icon}</span>
-                  <span className="text-xs font-bold text-gray-700 group-hover:text-indigo-600 transition-colors leading-tight">{svc.name}</span>
+                  <span className="text-3xl" aria-hidden="true">{svc.icon}</span>
+                  <span className="text-xs font-bold text-gray-700 group-hover:text-indigo-600 transition-colors leading-tight">
+                    {svc.name}
+                    <span className="sr-only"> in {cityName}</span>
+                  </span>
                 </Link>
               ))}
             </div>

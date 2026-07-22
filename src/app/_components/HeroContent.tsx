@@ -103,7 +103,7 @@ export default function HeroContent() {
           <div className="relative h-[480px] w-[360px] overflow-hidden">
             {prev !== null && (
               <div key={`prev-${prev}`} className="absolute inset-0 worker-slide-out">
-                <Image src={WORKER_IMAGES[prev]} fill className="object-contain object-bottom" alt="" />
+                <Image src={WORKER_IMAGES[prev]} fill className="object-contain object-bottom" alt="HunarWalaa Professional" />
               </div>
             )}
             <div key={`curr-${current}`} className={`absolute inset-0 ${prev !== null ? 'worker-slide-in' : ''}`}>
