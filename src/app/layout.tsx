@@ -121,6 +121,9 @@ const jsonLd = {
         "url": "https://hunarwalaa.com/logo.png",
       },
       "description": "Pakistan's #1 skill marketplace connecting clients with verified local professionals.",
+      "founder": {
+        "@id": "https://hunarwalaa.com/about#sulaiman-khan",
+      },
       "areaServed": {
         "@type": "Country",
         "name": "Pakistan",

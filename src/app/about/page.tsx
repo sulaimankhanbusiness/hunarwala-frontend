@@ -1,10 +1,29 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Users, ShieldCheck, Zap, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { Users, ShieldCheck, Zap, MapPin, ExternalLink } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About Us — HunarWalaa',
-  description: 'Learn about HunarWalaa — Pakistan\'s skill marketplace connecting clients with verified local professionals.',
+  description: 'Learn about HunarWalaa — Pakistan\'s skill marketplace connecting clients with verified local professionals. Founded by Sulaiman Khan.',
+  alternates: { canonical: 'https://hunarwalaa.com/about' },
+};
+
+const founderJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': 'https://hunarwalaa.com/about#sulaiman-khan',
+  name: 'Sulaiman Khan',
+  jobTitle: 'Co-Founder & CEO',
+  description: 'Sulaiman Khan is the Co-Founder and CEO of HunarWalaa, Pakistan\'s trusted service marketplace. A Software Engineering graduate from Abdul Wali Khan University Mardan, he leads product strategy, software architecture, and business growth for the platform.',
+  url: 'https://hunarwalaa.com/about',
+  image: 'https://hunarwalaa.com/sulaiman-khan.jpg',
+  alumniOf: {
+    '@type': 'EducationalOrganization',
+    name: 'Abdul Wali Khan University Mardan',
+  },
+  worksFor: { '@id': 'https://hunarwalaa.com/#organization' },
+  sameAs: ['https://www.linkedin.com/in/sulaiman-khan-19b3311b4'],
 };
 
 const values = [
@@ -33,6 +52,11 @@ const values = [
 export default function AboutPage() {
   return (
     <div className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(founderJsonLd) }}
+      />
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
@@ -72,6 +96,40 @@ export default function AboutPage() {
                 <div className="text-4xl font-bold text-indigo-600">100%</div>
                 <div className="text-gray-600 mt-1">Verified professionals</div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Founder */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Meet the Founder</h2>
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 bg-indigo-50 rounded-2xl p-8">
+            <Image
+              src="/sulaiman-khan.jpg"
+              alt="Sulaiman Khan, Co-Founder and CEO of HunarWalaa"
+              width={160}
+              height={160}
+              className="rounded-2xl object-cover w-40 h-40 flex-shrink-0"
+            />
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">Sulaiman Khan</h3>
+              <p className="text-indigo-600 font-semibold mb-4">Co-Founder &amp; CEO, HunarWalaa</p>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                Sulaiman Khan is the Co-Founder and CEO of HunarWalaa, leading product strategy, software architecture, and business growth. He designed and built the platform using Next.js, React Native, NestJS, and PostgreSQL to connect skilled professionals across Pakistan with customers who need their services.
+              </p>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                He holds a BS in Software Engineering from Abdul Wali Khan University Mardan (2021) and is focused on making HunarWalaa Pakistan&apos;s most trusted service marketplace — helping skilled workers find opportunities and grow their careers through technology.
+              </p>
+              <a
+                href="https://www.linkedin.com/in/sulaiman-khan-19b3311b4"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+              >
+                Connect on LinkedIn <ExternalLink size={16} />
+              </a>
             </div>
           </div>
         </div>
